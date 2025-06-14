@@ -53,7 +53,7 @@ export const DataStreamProvider = ({ children }: { children: React.ReactNode }) 
         })
       );
     }
-  }, []);
+  }, [partnerConfigs]);
 
   const unsubscribeRecentTokenList = useCallback(() => {
     subRecentTokenList.current = false;
