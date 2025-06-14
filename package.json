@@ -24,7 +24,7 @@
     "@solana/web3.js": "^1.95.1",
     "@tailwindcss/cli": "^4.1.4",
     "@tanstack/react-form": "^1.2.3",
-    "@tanstack/react-query": "4.29.5",
+    "@tanstack/react-query": "^5.80.7",
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/react-virtual": "^3.13.8",
     "@tanstack/zod-form-adapter": "^0.42.1",
