@@ -52,7 +52,7 @@ export function TerminalComponent({ mint }: { mint: string }) {
         });
       }, 1000);
     }
-  }, []);
+  }, [mint, isLoaded, launchTerminal]);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.Jupiter) {
