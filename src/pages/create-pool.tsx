@@ -6,8 +6,9 @@ import Header from '../components/Header';
 
 import { useForm } from '@tanstack/react-form';
 import { Button } from '@/components/ui/button';
-import { Keypair, Transaction } from '@solana/web3.js';
+import { Keypair, VersionedTransaction, Connection } from '@solana/web3.js';
 import { useUnifiedWalletContext, useWallet } from '@jup-ag/wallet-adapter';
+import { Buffer } from 'buffer';
 import { toast } from 'sonner';
 
 // Define the schema for form validation
@@ -18,6 +19,24 @@ const poolSchema = z.object({
   website: z.string().url({ message: 'Please enter a valid URL' }).optional().or(z.literal('')),
   twitter: z.string().url({ message: 'Please enter a valid URL' }).optional().or(z.literal('')),
 });
+
+interface CreateMeteoraTokenResponse {
+  transactions: string[];
+  mint: string;
+  ata: string;
+  metadataUri: string;
+  pool: string;
+  decimals: number;
+  initialSupply: number;
+  initialSupplyRaw: string;
+  depositSol: number;
+  depositLamports: number;
+  feeSol: number;
+  feeLamports: number;
+  isLockLiquidity: boolean;
+  buySol: number;
+  buyLamports: number;
+}
 
 interface FormValues {
   tokenName: string;
@@ -30,9 +49,13 @@ interface FormValues {
 export default function CreatePool() {
   const { publicKey, signTransaction } = useWallet();
   const address = useMemo(() => publicKey?.toBase58(), [publicKey]);
+  const { connection, setShowModal } = useUnifiedWalletContext();
 
   const [isLoading, setIsLoading] = useState(false);
   const [poolCreated, setPoolCreated] = useState(false);
+  const [previewData, setPreviewData] = useState<
+    (CreateMeteoraTokenResponse & { payload: any }) | null
+  >(null);
 
   const form = useForm({
     defaultValues: {
@@ -43,83 +66,51 @@ export default function CreatePool() {
       twitter: '',
     } as FormValues,
     onSubmit: async ({ value }) => {
+      setIsLoading(true);
       try {
-        setIsLoading(true);
-        const { tokenLogo } = value;
-        if (!tokenLogo) {
-          toast.error('Token logo is required');
-          return;
-        }
-
         if (!signTransaction) {
           toast.error('Wallet not connected');
           return;
         }
-
+        if (!value.tokenLogo) {
+          toast.error('Token logo is required');
+          return;
+        }
         const reader = new FileReader();
-
-        // Convert file to base64
-        const base64File = await new Promise<string>((resolve) => {
+        const imageUrl = await new Promise<string>((resolve) => {
           reader.onload = (e) => resolve(e.target?.result as string);
-          reader.readAsDataURL(tokenLogo);
+          reader.readAsDataURL(value.tokenLogo!);
         });
-
-        const keyPair = Keypair.generate();
-
-        // Step 1: Upload to R2 and get transaction
-        const uploadResponse = await fetch('/api/upload', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
+        const payload = {
+          walletAddress: address,
+          token: {
+            name: value.tokenName,
+            ticker: value.tokenSymbol,
+            description: value.tokenName,
+            websiteUrl: value.website || undefined,
+            twitter: value.twitter || undefined,
+            imageUrl,
           },
-          body: JSON.stringify({
-            tokenLogo: base64File,
-            mint: keyPair.publicKey.toBase58(),
-            tokenName: value.tokenName,
-            tokenSymbol: value.tokenSymbol,
-            userWallet: address,
-          }),
-        });
-
-        if (!uploadResponse.ok) {
-          const error = await uploadResponse.json();
-          throw new Error(error.error);
+          isLockLiquidity: false,
+          portalParams: {},
+        };
+        const res = await fetch(
+          'https://tknz.fun/.netlify/functions/create-token-meteora',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          }
+        );
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error ?? 'Preview failed');
         }
-
-        const { poolTx } = await uploadResponse.json();
-        const transaction = Transaction.from(Buffer.from(poolTx, 'base64'));
-
-        // Step 2: Sign with keypair first
-        transaction.sign(keyPair);
-
-        // Step 3: Then sign with user's wallet
-        const signedTransaction = await signTransaction(transaction);
-
-        // Step 4: Send signed transaction
-        const sendResponse = await fetch('/api/send-transaction', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            signedTransaction: signedTransaction.serialize().toString('base64'),
-          }),
-        });
-
-        if (!sendResponse.ok) {
-          const error = await sendResponse.json();
-          throw new Error(error.error);
-        }
-
-        const { success } = await sendResponse.json();
-        if (success) {
-          toast.success('Pool created successfully');
-          setPoolCreated(true);
-        }
-      } catch (error) {
-        console.error('Error creating pool:', error);
-        toast.error(error instanceof Error ? error.message : 'Failed to create pool');
-      } finally {
+        const data: CreateMeteoraTokenResponse = await res.json();
+        setPreviewData({ ...data, payload });
+      } catch (err: any) {
+        console.error('Error previewing pool creation:', err);
+        toast.error(err.message || 'Failed to preview pool creation');
         setIsLoading(false);
       }
     },
@@ -127,6 +118,49 @@ export default function CreatePool() {
       onSubmit: poolSchema,
     },
   });
+
+  // Execute previewed transactions, then call confirm and notify endpoints
+const handleConfirm = async () => {
+    if (!previewData) return;
+    setIsLoading(true);
+    try {
+      // Sign and submit each VersionedTransaction
+      for (const b64 of previewData.transactions) {
+        const tx = VersionedTransaction.deserialize(Buffer.from(b64, 'base64'));
+        // Preserve any server-side signatures and append wallet signature
+        const signedTx = await signTransaction(tx);
+        const ourSig = signedTx.signatures.find(
+          (s) => s.publicKey.equals(publicKey!)
+        )?.signature;
+        if (ourSig) tx.addSignature(publicKey!, ourSig);
+        const raw = tx.serialize();
+        const sig = await connection.sendRawTransaction(raw);
+        await connection.confirmTransaction(sig, 'confirmed');
+      }
+      // Confirm on backend
+      const confirmUrl = 'https://tknz.fun/.netlify/functions/confirm-token-creation';
+      const confirmRes = await fetch(confirmUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...previewData.payload, ...previewData }),
+      });
+      const confirmJson = await confirmRes.json();
+      // Notify backend
+      const notifyUrl = 'https://tknz.fun/.netlify/functions/notify-token-creation';
+      await fetch(notifyUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...previewData.payload, ...previewData, createdAt: confirmJson.createdAt }),
+      });
+      toast.success('Pool created successfully');
+      setPoolCreated(true);
+    } catch (err: any) {
+      console.error('Error executing pool creation:', err);
+      toast.error(err.message || 'Failed to create pool');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <>
@@ -153,6 +187,22 @@ export default function CreatePool() {
 
           {poolCreated && !isLoading ? (
             <PoolCreationSuccess />
+          ) : previewData ? (
+            <div className="space-y-8">
+              <div className="bg-white/5 rounded-xl p-8 backdrop-blur-sm border border-white/10">
+                <h2 className="text-2xl font-bold mb-4">Preview Pool Creation</h2>
+                <p>Deposit SOL: {previewData.depositSol}</p>
+                {previewData.buySol > 0 && <p>Purchase SOL: {previewData.buySol}</p>}
+                <div className="mt-6 flex gap-4 justify-end">
+                  <Button onClick={handleConfirm} disabled={isLoading}>
+                    {isLoading ? 'Submitting...' : 'Confirm & Launch Pool'}
+                  </Button>
+                  <Button variant="secondary" onClick={() => setPreviewData(null)} disabled={isLoading}>
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </div>
           ) : (
             <form
               onSubmit={(e) => {
