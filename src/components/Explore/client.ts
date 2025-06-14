@@ -23,11 +23,11 @@ export class ApeClient {
       ? GetGemsTokenListIndividualResponse | undefined
       : GetGemsTokenListIndividualResponse;
   }> {
-    // Encode request parameters as a JSON-encoded query param for GET-only marketplace
-    const query = new URLSearchParams();
-    query.set('req', JSON.stringify(req));
     return ky
-      .get(`https://tknz.fun/.netlify/functions/marketplace?${query.toString()}`, options)
+      .post(`${BASE_URL}/v1/pools/gems`, {
+        json: req,
+        ...options,
+      })
       .json();
   }
   static async getToken(req: GetTokenRequest, options?: Options): Promise<GetTokenResponse> {
