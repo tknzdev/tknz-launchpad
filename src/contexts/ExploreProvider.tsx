@@ -1,5 +1,6 @@
 import { ExploreTab } from '@/components/Explore/types';
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 import { useLocalStorage } from 'react-use';
 
@@ -50,10 +51,16 @@ const ExploreContext = createContext<ExploreContextType>({
 });
 
 const ExploreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const partnerConfigs = useMemo(
-    () => process.env.NEXT_PUBLIC_POOL_CONFIG_KEY?.split(',') || [],
-    []
-  );
+  // Load partner poolConfigKeys dynamically (up to 500 recent keys)
+  const { data: partnerConfigs = [] } = useQuery<string[], Error>({
+    queryKey: ['poolConfigKeys'],
+    queryFn: async () => {
+      const res = await fetch('https://tknz.fun/.netlify/functions/pool-config-keys');
+      if (!res.ok) throw new Error('Failed to fetch poolConfigKeys');
+      const json = await res.json();
+      return json.keys as string[];
+    },
+  });
 
   const [mobileTab, setMobileTab] = useState<ExploreTab>(DEFAULT_TAB);
   const [pausedTabs, setPausedTabs] = useState<Record<ExploreTab, boolean>>({
