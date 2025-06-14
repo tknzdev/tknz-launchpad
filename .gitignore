@@ -1,0 +1,4 @@
+dist/
+.netlify/
+.env
+node_modules/
