@@ -96,7 +96,7 @@ const CurveConfigPanel: React.FC<CurveConfigPanelProps> = ({
         <div className="bg-gray-800 p-3 flex items-center space-x-2">
           <Info className="w-4 h-4 text-gray-300" />
           <p className="text-sm text-gray-300">
-            Default configuration mimics Pump.fun's bonding curve. Modify
+            Default configuration mimics Pump.fun&apos;s bonding curve. Modify
             settings at your own risk.
           </p>
         </div>
