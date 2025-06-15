@@ -76,10 +76,8 @@ export default async function handler(
     });
   } catch (error) {
     console.error("Transaction error:", error);
-    res
-      .status(500)
-      .json({
-        error: error instanceof Error ? error.message : "Unknown error",
-      });
+    res.status(500).json({
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
   }
 }
