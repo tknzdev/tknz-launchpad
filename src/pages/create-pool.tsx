@@ -137,6 +137,7 @@ export default function CreatePool() {
       } catch (err: any) {
         console.error("Error previewing pool creation:", err);
         toast.error(err.message || "Failed to preview pool creation");
+      } finally {
         setIsLoading(false);
       }
     },
