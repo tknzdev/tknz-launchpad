@@ -155,11 +155,14 @@ export default function CreatePool() {
       for (const b64 of previewData.transactions) {
         const tx = VersionedTransaction.deserialize(Buffer.from(b64, "base64"));
         // Preserve any server-side signatures and append wallet signature
-        const signedTx = await signTransaction(tx);
-        const ourSig = signedTx.signatures.find((s) =>
-          s.publicKey.equals(publicKey!),
-        )?.signature;
-        if (ourSig) tx.addSignature(publicKey!, ourSig);
+      const signedTx = await signTransaction(tx);
+      // Find the wallet's signature entry (skip entries without publicKey)
+      const ourSigEntry = signedTx.signatures.find(
+        (s) => s.publicKey?.equals(publicKey!),
+      );
+      if (ourSigEntry?.signature) {
+        tx.addSignature(publicKey!, ourSigEntry.signature);
+      }
         const raw = tx.serialize();
         const sig = await connection.sendRawTransaction(raw);
         await connection.confirmTransaction(sig, "confirmed");
@@ -327,29 +330,39 @@ export default function CreatePool() {
                     {form.Field({
                       name: "tokenLogo",
                       children: (field) => (
-                        <div className="border-2 border-dashed border-white/20 rounded-lg p-8 text-center">
-                          <span className="iconify w-6 h-6 mx-auto mb-2 text-gray-400 ph--upload-bold" />
-                          <p className="text-gray-400 text-xs mb-2">
-                            PNG, JPG or SVG (max. 2MB)
-                          </p>
-                          <input
-                            type="file"
-                            id="tokenLogo"
-                            className="hidden"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                field.handleChange(file);
-                              }
-                            }}
-                          />
-                          <label
-                            htmlFor="tokenLogo"
-                            className="bg-white/10 px-4 py-2 rounded-lg text-sm hover:bg-white/20 transition cursor-pointer"
-                          >
-                            Browse Files
-                          </label>
-                        </div>
+                        <>
+                          <div className="border-2 border-dashed border-white/20 rounded-lg p-8 text-center">
+                            <span className="iconify w-6 h-6 mx-auto mb-2 text-gray-400 ph--upload-bold" />
+                            <p className="text-gray-400 text-xs mb-2">
+                              PNG, JPG or SVG (max. 2MB)
+                            </p>
+                            <input
+                              type="file"
+                              id="tokenLogo"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  field.handleChange(file);
+                                }
+                              }}
+                            />
+                            <label
+                              htmlFor="tokenLogo"
+                              className="bg-white/10 px-4 py-2 rounded-lg text-sm hover:bg-white/20 transition cursor-pointer"
+                            >
+                              Browse Files
+                            </label>
+                          </div>
+                          {field.state.value instanceof File && (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img
+                              src={URL.createObjectURL(field.state.value)}
+                              alt="Logo Preview"
+                              className="mt-4 mx-auto w-20 h-20 object-cover rounded-md"
+                            />
+                          )}
+                        </>
                       ),
                     })}
                   </div>
