@@ -1,18 +1,21 @@
-import { TokenPageMsgHandler } from '@/components/Token/TokenPageMsgHandler';
-import { TokenChart } from '@/components/TokenChart/TokenChart';
-import { TokenDetails } from '@/components/TokenHeader/TokenDetail';
-import { TokenHeader } from '@/components/TokenHeader/TokenHeader';
-import { TokenStats } from '@/components/TokenHeader/TokenStats';
-import { TxnsTab } from '@/components/TokenTransactions';
-import { TxTable } from '@/components/TokenTransactions/TxTable';
-import Page from '@/components/ui/Page/Page';
-import { DataStreamProvider, useDataStream } from '@/contexts/DataStreamProvider';
-import { TokenChartProvider } from '@/contexts/TokenChartProvider';
-import { useTokenAddress, useTokenInfo } from '@/hooks/queries';
-import dynamic from 'next/dynamic';
-import { useEffect } from 'react';
+import { TokenPageMsgHandler } from "@/components/Token/TokenPageMsgHandler";
+import { TokenChart } from "@/components/TokenChart/TokenChart";
+import { TokenDetails } from "@/components/TokenHeader/TokenDetail";
+import { TokenHeader } from "@/components/TokenHeader/TokenHeader";
+import { TokenStats } from "@/components/TokenHeader/TokenStats";
+import { TxnsTab } from "@/components/TokenTransactions";
+import { TxTable } from "@/components/TokenTransactions/TxTable";
+import Page from "@/components/ui/Page/Page";
+import {
+  DataStreamProvider,
+  useDataStream,
+} from "@/contexts/DataStreamProvider";
+import { TokenChartProvider } from "@/contexts/TokenChartProvider";
+import { useTokenAddress, useTokenInfo } from "@/hooks/queries";
+import dynamic from "next/dynamic";
+import { useEffect } from "react";
 
-const Terminal = dynamic(() => import('@/components/Terminal'), { ssr: false });
+const Terminal = dynamic(() => import("@/components/Terminal"), { ssr: false });
 
 const SwapWidget = () => {
   const tokenId = useTokenAddress();
@@ -22,7 +25,8 @@ const SwapWidget = () => {
 export const TokenPageWithContext = () => {
   const tokenId = useTokenAddress();
   const { data: poolId } = useTokenInfo((data) => data?.id);
-  const { subscribeTxns, unsubscribeTxns, subscribePools, unsubscribePools } = useDataStream();
+  const { subscribeTxns, unsubscribeTxns, subscribePools, unsubscribePools } =
+    useDataStream();
 
   // Subscribe to token txns
   useEffect(() => {
@@ -64,7 +68,7 @@ export const TokenPageWithContext = () => {
             </div>
           </div>
 
-          <div className={'border-neutral-850 w-full max-sm:order-2'}>
+          <div className={"border-neutral-850 w-full max-sm:order-2"}>
             <TokenStats key={`token-stats-${poolId}`} />
 
             <div className="flex flex-col h-[300px] lg:h-[500px] w-full">

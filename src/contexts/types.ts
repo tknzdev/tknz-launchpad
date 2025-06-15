@@ -1,15 +1,15 @@
 export const Launchpad = {
-  PUMPFUN: 'pump.fun',
-  VIRTUALS: 'virtuals',
-  DAOSFUN: 'daos.fun',
-  TIMEFUN: 'time.fun',
-  GOFUNDMEME: 'GoFundMeme',
-  DEALR: 'dealr.fun',
-  DIALECT: 'Dialect',
-  DBC: 'met-dbc',
-  LETSBONKFUN: 'letsbonk.fun',
-  RAYDIUM: 'Raydium',
-  COOKMEME: 'cook.meme',
+  PUMPFUN: "pump.fun",
+  VIRTUALS: "virtuals",
+  DAOSFUN: "daos.fun",
+  TIMEFUN: "time.fun",
+  GOFUNDMEME: "GoFundMeme",
+  DEALR: "dealr.fun",
+  DIALECT: "Dialect",
+  DBC: "met-dbc",
+  LETSBONKFUN: "letsbonk.fun",
+  RAYDIUM: "Raydium",
+  COOKMEME: "cook.meme",
 } as const;
 export type Launchpad = (typeof Launchpad)[keyof typeof Launchpad];
 
@@ -84,7 +84,7 @@ export type Pool = {
         }
       | undefined;
     organicScore?: number | undefined;
-    organicScoreLabel: 'high' | 'medium' | 'low';
+    organicScoreLabel: "high" | "medium" | "low";
     isVerified?: boolean | undefined;
     ctLikes?: number | undefined;
     smartCtLikes?: number | undefined;

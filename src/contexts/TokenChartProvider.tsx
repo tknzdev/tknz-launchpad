@@ -4,7 +4,7 @@ import {
   Mark,
   ResolutionString,
   SubscribeBarsCallback,
-} from '@/components/AdvancedTradingView/charting_library';
+} from "@/components/AdvancedTradingView/charting_library";
 import {
   MutableRefObject,
   PropsWithChildren,
@@ -13,23 +13,23 @@ import {
   useContext,
   useLayoutEffect,
   useRef,
-} from 'react';
-import { Pool } from './types';
-import { GetChartRequest } from '@/components/Explore/types';
-import { useDataStreamListener } from './DataStreamProvider';
-import { useTokenInfo } from '@/hooks/queries';
-import { useWallet } from '@jup-ag/wallet-adapter';
-import { asMarks } from './TokenChart/marks';
-import { getNextBar } from './TokenChart/bars';
+} from "react";
+import { Pool } from "./types";
+import { GetChartRequest } from "@/components/Explore/types";
+import { useDataStreamListener } from "./DataStreamProvider";
+import { useTokenInfo } from "@/hooks/queries";
+import { useWallet } from "@jup-ag/wallet-adapter";
+import { asMarks } from "./TokenChart/marks";
+import { getNextBar } from "./TokenChart/bars";
 
 const SMALL_TRADE_VALUE = 0.05;
 
 type ITokenChartContext = {
   onNewSwapTxsRef: MutableRefObject<SubscribeBarsCallback | undefined>;
   resolutionRef: MutableRefObject<ResolutionString | undefined>;
-  baseAssetRef: MutableRefObject<Pool['baseAsset'] | undefined>;
+  baseAssetRef: MutableRefObject<Pool["baseAsset"] | undefined>;
   resolutionToMostRecentBarRef: MutableRefObject<Record<string, Bar>>;
-  chartTypeRef: MutableRefObject<GetChartRequest['type']>;
+  chartTypeRef: MutableRefObject<GetChartRequest["type"]>;
   userAddressRef: MutableRefObject<string | undefined>;
   onNewMarksRef: MutableRefObject<GetMarksCallback<Mark> | undefined>;
   showDevTradesRef: MutableRefObject<boolean>;
@@ -38,12 +38,14 @@ type ITokenChartContext = {
 
 const TokenChartContext = createContext<ITokenChartContext | null>(null);
 
-export const TokenChartProvider: React.FC<PropsWithChildren> = ({ children }) => {
+export const TokenChartProvider: React.FC<PropsWithChildren> = ({
+  children,
+}) => {
   const onNewSwapTxsRef = useRef<SubscribeBarsCallback | undefined>(undefined);
   const resolutionToMostRecentBarRef = useRef<Record<string, Bar>>({}); // key: `${poolAddress}`
   const resolutionRef = useRef<ResolutionString | undefined>(undefined);
-  const chartTypeRef = useRef<GetChartRequest['type']>('price');
-  const baseAssetRef = useRef<Pool['baseAsset'] | undefined>(undefined);
+  const chartTypeRef = useRef<GetChartRequest["type"]>("price");
+  const baseAssetRef = useRef<Pool["baseAsset"] | undefined>(undefined);
   const userAddressRef = useRef<string | undefined>(undefined);
   const onNewMarksRef = useRef<GetMarksCallback<Mark> | undefined>(undefined);
   const showDevTradesRef = useRef<boolean>(true);
@@ -64,14 +66,14 @@ export const TokenChartProvider: React.FC<PropsWithChildren> = ({ children }) =>
   }, [address, userAddressRef]);
 
   useDataStreamListener(
-    ['actions'],
+    ["actions"],
     useCallback((get, set, msg) => {
       // Update chart data
       const resolution = resolutionRef.current;
       const baseAsset = baseAssetRef.current;
       const resolutionToMostRecentBar = resolutionToMostRecentBarRef.current;
       if (!resolution || !baseAsset || !resolutionToMostRecentBar) {
-        console.error('DataStream: missing data, cannot update live chart: ', {
+        console.error("DataStream: missing data, cannot update live chart: ", {
           resolution,
           baseAsset,
           resolutionToMostRecentBar,
@@ -89,11 +91,13 @@ export const TokenChartProvider: React.FC<PropsWithChildren> = ({ children }) =>
           // Remove tiny swaps
           tx.usdVolume >= SMALL_TRADE_VALUE &&
           // Ensure swaps are from most reliable pool OR user/dev trades
-          (tx.isMrp || tx.traderAddress === userAddress || tx.traderAddress === devAddress)
+          (tx.isMrp ||
+            tx.traderAddress === userAddress ||
+            tx.traderAddress === devAddress),
       );
 
       if (filteredTxs.length === 0) {
-        console.error('DataStream: no valid txs found, breaking!');
+        console.error("DataStream: no valid txs found, breaking!");
         return;
       }
 
@@ -101,21 +105,28 @@ export const TokenChartProvider: React.FC<PropsWithChildren> = ({ children }) =>
       const onNewMarks = onNewMarksRef.current;
       const showDevTrades = showDevTradesRef.current;
       if (onNewMarks && showDevTrades && devAddress) {
-        const devSwaps = filteredTxs.filter((action) => action.traderAddress === devAddress);
+        const devSwaps = filteredTxs.filter(
+          (action) => action.traderAddress === devAddress,
+        );
         if (devSwaps.length > 0) {
           const marks = asMarks(
             devSwaps,
             { id: baseAsset.id, circSupply: baseAsset.circSupply },
-            true
+            true,
           );
           onNewMarks(marks);
         }
       }
       const showUserTrades = showUserTradesRef.current;
       if (onNewMarks && showUserTrades && userAddress) {
-        const userSwaps = filteredTxs.filter((action) => action.traderAddress === userAddress);
+        const userSwaps = filteredTxs.filter(
+          (action) => action.traderAddress === userAddress,
+        );
         if (userSwaps.length > 0) {
-          const marks = asMarks(userSwaps, { id: baseAsset.id, circSupply: baseAsset.circSupply });
+          const marks = asMarks(userSwaps, {
+            id: baseAsset.id,
+            circSupply: baseAsset.circSupply,
+          });
           onNewMarks(marks);
         }
       }
@@ -128,7 +139,7 @@ export const TokenChartProvider: React.FC<PropsWithChildren> = ({ children }) =>
           {
             resolutionToMostRecentBar,
             mostRecentBarKey,
-          }
+          },
         );
         return;
       }
@@ -137,7 +148,7 @@ export const TokenChartProvider: React.FC<PropsWithChildren> = ({ children }) =>
         recentBar,
         filteredTxs,
         resolution,
-        chartTypeRef.current === 'mcap' ? baseAsset.circSupply : 1
+        chartTypeRef.current === "mcap" ? baseAsset.circSupply : 1,
       );
       if (!nextBar) {
         console.error("DataStream: missing 'nextBar': ", {
@@ -151,11 +162,11 @@ export const TokenChartProvider: React.FC<PropsWithChildren> = ({ children }) =>
 
       const callback = onNewSwapTxsRef.current;
       if (!callback) {
-        console.error('DataStream: failed to update chart with latest txs!');
+        console.error("DataStream: failed to update chart with latest txs!");
         return;
       }
       callback(nextBar);
-    }, [])
+    }, []),
   );
 
   return (
@@ -180,7 +191,7 @@ export const TokenChartProvider: React.FC<PropsWithChildren> = ({ children }) =>
 export const useTokenChart = () => {
   const context = useContext(TokenChartContext);
   if (!context) {
-    throw new Error('useTokenChart must be used within TokenChartProvider');
+    throw new Error("useTokenChart must be used within TokenChartProvider");
   }
   return context;
 };

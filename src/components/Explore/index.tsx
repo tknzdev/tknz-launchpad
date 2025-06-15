@@ -1,8 +1,8 @@
-import ExploreGrid from './ExploreGrid';
-import { DataStreamProvider } from '@/contexts/DataStreamProvider';
-import { ExploreMsgHandler } from './ExploreMsgHandler';
-import { ExploreProvider } from '@/contexts/ExploreProvider';
-import { PropsWithChildren } from 'react';
+import ExploreGrid from "./ExploreGrid";
+import { DataStreamProvider } from "@/contexts/DataStreamProvider";
+import { ExploreMsgHandler } from "./ExploreMsgHandler";
+import { ExploreProvider } from "@/contexts/ExploreProvider";
+import { PropsWithChildren } from "react";
 
 const Explore = () => {
   return (

@@ -1,5 +1,5 @@
-import { useCurrentDate } from '@/lib/environment/date';
-import { formatAge } from '@/lib/format/date';
+import { useCurrentDate } from "@/lib/environment/date";
+import { formatAge } from "@/lib/format/date";
 
 type CurrentAgeProps = {
   date: Date;

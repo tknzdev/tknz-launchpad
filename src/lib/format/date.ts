@@ -1,4 +1,4 @@
-import { DASH } from './number';
+import { DASH } from "./number";
 
 /**
  * Formats the given `date` as a relative time string.
@@ -8,7 +8,9 @@ export function formatAge(date: Date | undefined | null, now: Date) {
     return DASH;
   }
 
-  const secondsDiff = Math.abs(Math.floor((date.getTime() - now.getTime()) / 1000));
+  const secondsDiff = Math.abs(
+    Math.floor((date.getTime() - now.getTime()) / 1000),
+  );
 
   // Less than 60 secs, we show seconds only
   if (secondsDiff < 60) {
@@ -48,16 +50,16 @@ export class _IntlDate {
     input: Date | string | number,
     options?: {
       timezone?: string | undefined;
-    }
+    },
   ): string {
     const date = new Date(input);
     const timeZonePart = new Intl.DateTimeFormat(this.locale, {
       timeZone: options?.timezone,
-      timeZoneName: 'short',
+      timeZoneName: "short",
     })
       .formatToParts(date)
-      .find((part) => part.type == 'timeZoneName');
-    return timeZonePart ? timeZonePart.value : '';
+      .find((part) => part.type == "timeZoneName");
+    return timeZonePart ? timeZonePart.value : "";
   }
 
   public format(
@@ -70,7 +72,7 @@ export class _IntlDate {
       withoutYear?: boolean | undefined;
       withTimezone?: boolean | undefined;
       hour12?: boolean | undefined;
-    }
+    },
   ): string {
     const date = this.toDate(inputDate);
     if (date === null) {
@@ -78,21 +80,21 @@ export class _IntlDate {
     }
     const datePart = date.toLocaleDateString(this.locale, {
       timeZone: options?.timezone,
-      day: 'numeric',
-      month: 'short',
-      year: options?.withoutYear ? undefined : 'numeric',
+      day: "numeric",
+      month: "short",
+      year: options?.withoutYear ? undefined : "numeric",
       timeZoneName: options?.withoutTime
         ? options?.withTimezone
-          ? 'short'
+          ? "short"
           : undefined
         : undefined,
     });
     const timePart = date.toLocaleTimeString(this.locale, {
       timeZone: options?.timezone,
-      hour: '2-digit',
-      minute: '2-digit',
-      second: options?.withoutSeconds ? undefined : '2-digit',
-      timeZoneName: options?.withTimezone ? 'short' : undefined,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: options?.withoutSeconds ? undefined : "2-digit",
+      timeZoneName: options?.withTimezone ? "short" : undefined,
       hour12: options?.hour12,
     });
     return options?.withoutDate

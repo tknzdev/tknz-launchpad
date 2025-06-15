@@ -1,5 +1,5 @@
-import { atom, useAtomValue, useSetAtom } from 'jotai';
-import { useEffect } from 'react';
+import { atom, useAtomValue, useSetAtom } from "jotai";
+import { useEffect } from "react";
 
 /**
  * The current date, updated every second

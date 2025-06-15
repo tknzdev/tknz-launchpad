@@ -1,4 +1,4 @@
-import React, { SVGProps } from 'react';
+import React, { SVGProps } from "react";
 
 const ExternalIcon: React.FC<SVGProps<SVGSVGElement>> = ({
   width = 10,

@@ -1,7 +1,7 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import AWS from 'aws-sdk';
-import { Connection, PublicKey } from '@solana/web3.js';
-import { DynamicBondingCurveClient } from '@meteora-ag/dynamic-bonding-curve-sdk';
+import { NextApiRequest, NextApiResponse } from "next";
+import AWS from "aws-sdk";
+import { Connection, PublicKey } from "@solana/web3.js";
+import { DynamicBondingCurveClient } from "@meteora-ag/dynamic-bonding-curve-sdk";
 
 // Environment variables with type assertions
 const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID as string;
@@ -19,11 +19,11 @@ if (
   !RPC_URL ||
   !POOL_CONFIG_KEY
 ) {
-  throw new Error('Missing required environment variables');
+  throw new Error("Missing required environment variables");
 }
 
 const PRIVATE_R2_URL = `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`;
-const PUBLIC_R2_URL = 'https://pub-85c7f5f0dc104dc784e656b623d999e5.r2.dev';
+const PUBLIC_R2_URL = "https://pub-85c7f5f0dc104dc784e656b623d999e5.r2.dev";
 
 // Types
 type UploadRequest = {
@@ -52,32 +52,41 @@ const r2 = new AWS.S3({
   endpoint: PRIVATE_R2_URL,
   accessKeyId: R2_ACCESS_KEY_ID,
   secretAccessKey: R2_SECRET_ACCESS_KEY,
-  region: 'auto',
-  signatureVersion: 'v4',
+  region: "auto",
+  signatureVersion: "v4",
 });
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
-    const { tokenLogo, tokenName, tokenSymbol, mint, userWallet } = req.body as UploadRequest;
+    const { tokenLogo, tokenName, tokenSymbol, mint, userWallet } =
+      req.body as UploadRequest;
 
     // Validate required fields
     if (!tokenLogo || !tokenName || !tokenSymbol || !mint || !userWallet) {
-      return res.status(400).json({ error: 'Missing required fields' });
+      return res.status(400).json({ error: "Missing required fields" });
     }
 
     // Upload image and metadata
     const imageUrl = await uploadImage(tokenLogo, mint);
     if (!imageUrl) {
-      return res.status(400).json({ error: 'Failed to upload image' });
+      return res.status(400).json({ error: "Failed to upload image" });
     }
 
-    const metadataUrl = await uploadMetadata({ tokenName, tokenSymbol, mint, image: imageUrl });
+    const metadataUrl = await uploadMetadata({
+      tokenName,
+      tokenSymbol,
+      mint,
+      image: imageUrl,
+    });
     if (!metadataUrl) {
-      return res.status(400).json({ error: 'Failed to upload metadata' });
+      return res.status(400).json({ error: "Failed to upload metadata" });
     }
 
     // Create pool transaction
@@ -96,34 +105,43 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           requireAllSignatures: false,
           verifySignatures: false,
         })
-        .toString('base64'),
+        .toString("base64"),
     });
   } catch (error) {
-    console.error('Upload error:', error);
-    res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+    console.error("Upload error:", error);
+    res
+      .status(500)
+      .json({
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
   }
 }
 
-async function uploadImage(tokenLogo: string, mint: string): Promise<string | false> {
+async function uploadImage(
+  tokenLogo: string,
+  mint: string,
+): Promise<string | false> {
   const matches = tokenLogo.match(/^data:([A-Za-z-+/]+);base64,(.+)$/);
   if (!matches || matches.length !== 3) {
     return false;
   }
 
   const [, contentType, base64Data] = matches;
-  const fileBuffer = Buffer.from(base64Data, 'base64');
-  const fileName = `images/${mint}.${contentType.split('/')[1]}`;
+  const fileBuffer = Buffer.from(base64Data, "base64");
+  const fileName = `images/${mint}.${contentType.split("/")[1]}`;
 
   try {
     await uploadToR2(fileBuffer, contentType, fileName);
     return `${PUBLIC_R2_URL}/${fileName}`;
   } catch (error) {
-    console.error('Error uploading image:', error);
+    console.error("Error uploading image:", error);
     return false;
   }
 }
 
-async function uploadMetadata(params: MetadataUploadParams): Promise<string | false> {
+async function uploadMetadata(
+  params: MetadataUploadParams,
+): Promise<string | false> {
   const metadata: Metadata = {
     name: params.tokenName,
     symbol: params.tokenSymbol,
@@ -132,10 +150,14 @@ async function uploadMetadata(params: MetadataUploadParams): Promise<string | fa
   const fileName = `metadata/${params.mint}.json`;
 
   try {
-    await uploadToR2(Buffer.from(JSON.stringify(metadata, null, 2)), 'application/json', fileName);
+    await uploadToR2(
+      Buffer.from(JSON.stringify(metadata, null, 2)),
+      "application/json",
+      fileName,
+    );
     return `${PUBLIC_R2_URL}/${fileName}`;
   } catch (error) {
-    console.error('Error uploading metadata:', error);
+    console.error("Error uploading metadata:", error);
     return false;
   }
 }
@@ -143,7 +165,7 @@ async function uploadMetadata(params: MetadataUploadParams): Promise<string | fa
 async function uploadToR2(
   fileBuffer: Buffer,
   contentType: string,
-  fileName: string
+  fileName: string,
 ): Promise<AWS.S3.PutObjectOutput> {
   return new Promise((resolve, reject) => {
     r2.putObject(
@@ -159,7 +181,7 @@ async function uploadToR2(
         } else {
           resolve(data);
         }
-      }
+      },
     );
   });
 }
@@ -177,8 +199,8 @@ async function createPoolTransaction({
   metadataUrl: string;
   userWallet: string;
 }) {
-  const connection = new Connection(RPC_URL, 'confirmed');
-  const client = new DynamicBondingCurveClient(connection, 'confirmed');
+  const connection = new Connection(RPC_URL, "confirmed");
+  const client = new DynamicBondingCurveClient(connection, "confirmed");
 
   const poolTx = await client.pool.createPool({
     config: new PublicKey(POOL_CONFIG_KEY),

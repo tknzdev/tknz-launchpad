@@ -1,4 +1,4 @@
-const TV_CHART_STATE = 'TRADING_VIEW_STATE';
+const TV_CHART_STATE = "TRADING_VIEW_STATE";
 
 export const saveChartState = (state: object) => {
   window.localStorage.setItem(TV_CHART_STATE, JSON.stringify(state));

@@ -1,7 +1,11 @@
-import React from 'react';
-import { IconProps } from './types';
+import React from "react";
+import { IconProps } from "./types";
 
-const TelegramIcon: React.FC<IconProps> = ({ width = 12, height = 12, ...props }) => {
+const TelegramIcon: React.FC<IconProps> = ({
+  width = 12,
+  height = 12,
+  ...props
+}) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

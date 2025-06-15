@@ -1,9 +1,15 @@
-import React from 'react';
-import { IconProps } from './types';
+import React from "react";
+import { IconProps } from "./types";
 
 export const GoFundMemeIcon: React.FC<IconProps> = (props) => {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" width="1em" height="1em" {...props}>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 12 12"
+      width="1em"
+      height="1em"
+      {...props}
+    >
       <path
         d="M3.87693 9.1875H0.168532V8.65227H-0.366699V3.34773H0.168532V2.8125H3.35126V3.34773H3.87693V9.1875ZM3.35126 8.65227V5.46954H1.75511V6.53046H2.29034V7.59136H1.22944V4.40864H2.29034V4.94387H3.35126V3.87341H2.81603V3.34773H0.6942V3.87341H0.168532V8.12659H0.6942V8.65227H1.75511V8.12659H2.29034V8.65227H3.35126Z"
         fill="white"

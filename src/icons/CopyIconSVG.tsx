@@ -1,4 +1,4 @@
-import { SVGProps } from 'react';
+import { SVGProps } from "react";
 
 const CopyIconSVG: React.FC<SVGProps<SVGSVGElement>> = ({
   width = 16,

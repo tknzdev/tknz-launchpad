@@ -1,5 +1,5 @@
-import React, { memo } from 'react';
-import { DIGIT_SUBSCRIPT_RE, parseSubscript } from '@/lib/format/number';
+import React, { memo } from "react";
+import { DIGIT_SUBSCRIPT_RE, parseSubscript } from "@/lib/format/number";
 
 type DigitSubscriptProps = {
   value: string;
@@ -11,7 +11,9 @@ type DigitSubscriptProps = {
  * @example
  * <DigitSubscript value="123.0₇₇1" /> // renders as 123.0<sub>₇₇</sub>1
  */
-export const DigitSubscript = memo(function DigitSubscript({ value }: DigitSubscriptProps) {
+export const DigitSubscript = memo(function DigitSubscript({
+  value,
+}: DigitSubscriptProps) {
   const parts = value.split(DIGIT_SUBSCRIPT_RE);
 
   return (

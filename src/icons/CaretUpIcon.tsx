@@ -1,6 +1,10 @@
-import { IconProps } from './types';
+import { IconProps } from "./types";
 
-const CaretUpIcon: React.FC<IconProps> = ({ width = 24, height = 24, ...otherProps }) => {
+const CaretUpIcon: React.FC<IconProps> = ({
+  width = 24,
+  height = 24,
+  ...otherProps
+}) => {
   return (
     <svg
       viewBox="0 0 16 16"

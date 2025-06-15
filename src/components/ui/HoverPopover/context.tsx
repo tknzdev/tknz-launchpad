@@ -1,4 +1,4 @@
-import { Popover as PopoverPrimitive } from 'radix-ui';
+import { Popover as PopoverPrimitive } from "radix-ui";
 import {
   createContext,
   memo,
@@ -10,15 +10,15 @@ import {
   useMemo,
   useRef,
   useState,
-} from 'react';
+} from "react";
 
-import { isHoverableDevice } from '@/lib/device';
+import { isHoverableDevice } from "@/lib/device";
 import {
   HoverPopoverContent,
   HoverPopoverContentProps,
   HoverPopoverTrigger,
   HoverPopoverTriggerProps,
-} from './index';
+} from "./index";
 
 type HoverPopoverContextType = {
   open: boolean;
@@ -37,7 +37,7 @@ const HoverPopoverContext = createContext<HoverPopoverContextType>({
 type HoverPopoverProps = HoverPopoverTriggerProps &
   Pick<
     HoverPopoverContentProps,
-    'sideOffset' | 'side' | 'alignOffset' | 'align' | 'collisionPadding'
+    "sideOffset" | "side" | "alignOffset" | "align" | "collisionPadding"
   > & {
     delayDuration?: number | undefined;
     root?: boolean | undefined;
@@ -128,7 +128,7 @@ const HoverPopover: React.FC<PropsWithChildren<HoverPopoverProps>> = memo(
           openTimerRef.current = 0;
         }, delayDuration);
       },
-      [delayDuration, setOpen, openTimerRef]
+      [delayDuration, setOpen, openTimerRef],
     );
 
     const handleOpenChange = useCallback(
@@ -138,7 +138,7 @@ const HoverPopover: React.FC<PropsWithChildren<HoverPopoverProps>> = memo(
         openTimerRef.current = 0;
         setOpen(newOpen);
       },
-      [setOpen, openTimerRef]
+      [setOpen, openTimerRef],
     );
 
     const handleMouseEnter = useCallback(() => {
@@ -150,7 +150,12 @@ const HoverPopover: React.FC<PropsWithChildren<HoverPopoverProps>> = memo(
       } else {
         handleOpenChange(true);
       }
-    }, [isOpenDelayed, disableHover, handleDelayedOpenChange, handleOpenChange]);
+    }, [
+      isOpenDelayed,
+      disableHover,
+      handleDelayedOpenChange,
+      handleOpenChange,
+    ]);
 
     const handleMouseLeave = useCallback(() => {
       if (!isHoverableDevice() || disableHover) {
@@ -161,7 +166,12 @@ const HoverPopover: React.FC<PropsWithChildren<HoverPopoverProps>> = memo(
       } else {
         handleOpenChange(false);
       }
-    }, [isOpenDelayed, disableHover, handleDelayedOpenChange, handleOpenChange]);
+    }, [
+      isOpenDelayed,
+      disableHover,
+      handleDelayedOpenChange,
+      handleOpenChange,
+    ]);
 
     const handleOpen = useCallback(
       (newOpen: boolean) => {
@@ -169,7 +179,7 @@ const HoverPopover: React.FC<PropsWithChildren<HoverPopoverProps>> = memo(
           setOpen(newOpen);
         }
       },
-      [disableHover, setOpen]
+      [disableHover, setOpen],
     );
 
     useEffect(() => {
@@ -207,13 +217,13 @@ const HoverPopover: React.FC<PropsWithChildren<HoverPopoverProps>> = memo(
         </PopoverPrimitive.Root>
       </HoverPopoverContext.Provider>
     );
-  }
+  },
 );
 
 const useHoverPopover = () => {
   const ctx = useContext(HoverPopoverContext);
   if (!ctx) {
-    throw new Error('useHoverPopover must be used within HoverPopover');
+    throw new Error("useHoverPopover must be used within HoverPopover");
   }
   return ctx;
 };

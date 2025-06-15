@@ -1,15 +1,21 @@
-import { ExploreTab } from '@/components/Explore/types';
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { ExploreTab } from "@/components/Explore/types";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
+import { useQuery } from "@tanstack/react-query";
 
-import { useLocalStorage } from 'react-use';
+import { useLocalStorage } from "react-use";
 
-import { TokenListFilters } from '@/components/Explore/types';
-import { TokenListTimeframe } from '@/components/Explore/types';
-import { GemsTokenListQueryArgs } from '@/components/Explore/queries';
-import { StorageKey } from '@/constants';
+import { TokenListFilters } from "@/components/Explore/types";
+import { TokenListTimeframe } from "@/components/Explore/types";
+import { GemsTokenListQueryArgs } from "@/components/Explore/queries";
+import { StorageKey } from "@/constants";
 
-export const EXPLORE_FIXED_TIMEFRAME: TokenListTimeframe = '24h';
+export const EXPLORE_FIXED_TIMEFRAME: TokenListTimeframe = "24h";
 const DEFAULT_TAB: ExploreTab = ExploreTab.NEW;
 
 type FiltersConfig = {
@@ -50,13 +56,17 @@ const ExploreContext = createContext<ExploreContextType>({
   setTabPaused: () => {},
 });
 
-const ExploreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const ExploreProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   // Load partner poolConfigKeys dynamically (up to 500 recent keys)
   const { data: partnerConfigs = [] } = useQuery<string[], Error>({
-    queryKey: ['poolConfigKeys'],
+    queryKey: ["poolConfigKeys"],
     queryFn: async () => {
-      const res = await fetch('https://tknz.fun/.netlify/functions/pool-config-keys');
-      if (!res.ok) throw new Error('Failed to fetch poolConfigKeys');
+      const res = await fetch(
+        "https://tknz.fun/.netlify/functions/pool-config-keys",
+      );
+      if (!res.ok) throw new Error("Failed to fetch poolConfigKeys");
       const json = await res.json();
       return json.keys as string[];
     },
@@ -72,7 +82,7 @@ const ExploreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
   // Store all filters in an object to avoid tab -> filter state sync issues
   const [filtersConfig, setFiltersConfig] = useLocalStorage<FiltersConfig>(
     StorageKey.INTEL_EXPLORER_FILTERS_CONFIG,
-    {}
+    {},
   );
 
   const setFilters = useCallback(
@@ -82,7 +92,7 @@ const ExploreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
         [tab]: newFilters,
       });
     },
-    [setFiltersConfig, filtersConfig]
+    [setFiltersConfig, filtersConfig],
   );
 
   const setTabPaused = useCallback((tab: ExploreTab, isPaused: boolean) => {
@@ -103,7 +113,7 @@ const ExploreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
             partnerConfigs,
           },
         },
-      ])
+      ]),
     ) as Required<GemsTokenListQueryArgs>;
   }, [filtersConfig, partnerConfigs]);
 
@@ -127,7 +137,7 @@ const ExploreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
 const useExplore = () => {
   const ctx = useContext(ExploreContext);
   if (!ctx) {
-    throw new Error('useExplore must be used within ExploreProvider');
+    throw new Error("useExplore must be used within ExploreProvider");
   }
   return ctx;
 };

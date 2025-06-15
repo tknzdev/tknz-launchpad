@@ -1,7 +1,12 @@
-import { useState } from 'react';
-import { toast } from 'sonner';
-import { useWallet } from '@jup-ag/wallet-adapter';
-import { Connection, Keypair, Transaction, sendAndConfirmRawTransaction } from '@solana/web3.js';
+import { useState } from "react";
+import { toast } from "sonner";
+import { useWallet } from "@jup-ag/wallet-adapter";
+import {
+  Connection,
+  Keypair,
+  Transaction,
+  sendAndConfirmRawTransaction,
+} from "@solana/web3.js";
 
 type SendTransactionOptions = {
   onSuccess?: (signature: string) => void;
@@ -18,12 +23,12 @@ export function useSendTransaction() {
   const sendTransaction = async (
     transaction: Transaction,
     connection: Connection,
-    options: SendTransactionOptions = {}
+    options: SendTransactionOptions = {},
   ) => {
     if (!publicKey || !signTransaction) {
-      const walletError = new Error('Wallet not connected');
+      const walletError = new Error("Wallet not connected");
       setError(walletError);
-      toast.error('Wallet not connected. Please connect your wallet.');
+      toast.error("Wallet not connected. Please connect your wallet.");
       options.onError?.(walletError.message);
       return null;
     }
@@ -45,7 +50,9 @@ export function useSendTransaction() {
       const simulation = await connection.simulateTransaction(transaction);
 
       if (simulation.value.err) {
-        throw new Error(`Transaction simulation failed: ${JSON.stringify(simulation.value.err)}`);
+        throw new Error(
+          `Transaction simulation failed: ${JSON.stringify(simulation.value.err)}`,
+        );
       }
 
       // Sign and send transaction
@@ -59,14 +66,14 @@ export function useSendTransaction() {
       const txSignature = await sendAndConfirmRawTransaction(
         connection,
         signedTransaction.serialize(),
-        { commitment: 'confirmed' }
+        { commitment: "confirmed" },
       );
 
       setSignature(txSignature);
       options.onSuccess?.(txSignature);
       return txSignature;
     } catch (error: any) {
-      const errorMessage = error?.message || 'Unknown error';
+      const errorMessage = error?.message || "Unknown error";
       options.onError?.(`Transaction failed: ${errorMessage}`);
     } finally {
       setIsLoading(false);

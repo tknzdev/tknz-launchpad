@@ -1,12 +1,12 @@
-import { useMinimalTokenInfo, useTokenInfo } from '@/hooks/queries';
-import { cn } from '@/lib/utils';
-import { memo } from 'react';
-import { getNumberColorCn, ReadableNumber } from '../ui/ReadableNumber';
-import { formatReadablePercentChange } from '@/lib/format/number';
-import { Copyable } from '../ui/Copyable';
-import { TruncatedAddress } from '../TruncatedAddress/TruncatedAddress';
-import CopyIconSVG from '@/icons/CopyIconSVG';
-import { TrenchesTokenIcon, TrenchesTokenIconImage } from '../TokenIcon';
+import { useMinimalTokenInfo, useTokenInfo } from "@/hooks/queries";
+import { cn } from "@/lib/utils";
+import { memo } from "react";
+import { getNumberColorCn, ReadableNumber } from "../ui/ReadableNumber";
+import { formatReadablePercentChange } from "@/lib/format/number";
+import { Copyable } from "../ui/Copyable";
+import { TruncatedAddress } from "../TruncatedAddress/TruncatedAddress";
+import CopyIconSVG from "@/icons/CopyIconSVG";
+import { TrenchesTokenIcon, TrenchesTokenIconImage } from "../TokenIcon";
 
 type TokenHeaderProps = {
   className?: string;
@@ -22,7 +22,7 @@ export const TokenHeader: React.FC<TokenHeaderProps> = memo(({ className }) => {
       : pool.baseAsset.stats24h.priceChange / 100;
 
   return (
-    <div className={cn('flex items-center overflow-hidden w-full', className)}>
+    <div className={cn("flex items-center overflow-hidden w-full", className)}>
       <div className="relative mr-2 flex shrink-0 items-center rounded-lg bg-neutral-850">
         <TrenchesTokenIcon className="rounded-lg" token={minimalTokenInfo}>
           <TrenchesTokenIconImage className="rounded-lg" />
@@ -40,17 +40,17 @@ export const TokenHeader: React.FC<TokenHeaderProps> = memo(({ className }) => {
               name="Address"
               copyText={minimalTokenInfo.address}
               className={cn(
-                'flex min-w-0 items-center gap-0.5 text-sm text-neutral-500 duration-500 hover:text-neutral-200'
+                "flex min-w-0 items-center gap-0.5 text-sm text-neutral-500 duration-500 hover:text-neutral-200",
               )}
             >
               {(copied) => (
                 <>
                   <TruncatedAddress
                     className={cn(
-                      'min-w-0 overflow-hidden text-clip whitespace-nowrap leading-none tracking-tight',
+                      "min-w-0 overflow-hidden text-clip whitespace-nowrap leading-none tracking-tight",
                       {
-                        'text-primary': copied,
-                      }
+                        "text-primary": copied,
+                      },
                     )}
                     address={minimalTokenInfo.address}
                   />
@@ -65,7 +65,12 @@ export const TokenHeader: React.FC<TokenHeaderProps> = memo(({ className }) => {
           )}
         </div>
 
-        <div className={cn('flex flex-col items-end justify-center gap-0.5', className)}>
+        <div
+          className={cn(
+            "flex flex-col items-end justify-center gap-0.5",
+            className,
+          )}
+        >
           <ReadableNumber
             className="leading-none tracking-tight font-semibold"
             format="price"
@@ -74,8 +79,13 @@ export const TokenHeader: React.FC<TokenHeaderProps> = memo(({ className }) => {
             animated
             showDirection
           />
-          <div className={cn('text-xs leading-none font-semibold', getNumberColorCn(pctChange))}>
-            {formatReadablePercentChange(pctChange, { hideSign: 'positive' })}
+          <div
+            className={cn(
+              "text-xs leading-none font-semibold",
+              getNumberColorCn(pctChange),
+            )}
+          >
+            {formatReadablePercentChange(pctChange, { hideSign: "positive" })}
           </div>
         </div>
       </div>
@@ -83,4 +93,4 @@ export const TokenHeader: React.FC<TokenHeaderProps> = memo(({ className }) => {
   );
 });
 
-TokenHeader.displayName = 'TokenHeader';
+TokenHeader.displayName = "TokenHeader";

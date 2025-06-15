@@ -1,6 +1,6 @@
-import React, { ReactNode, useCallback, useRef, useState } from 'react';
-import { HoverPopover } from './HoverPopover/context';
-import { HoverPopoverContent, HoverPopoverTrigger } from './HoverPopover';
+import React, { ReactNode, useCallback, useRef, useState } from "react";
+import { HoverPopover } from "./HoverPopover/context";
+import { HoverPopoverContent, HoverPopoverTrigger } from "./HoverPopover";
 
 type CopyableProps = {
   copyText: string;
@@ -9,7 +9,12 @@ type CopyableProps = {
   children?: ReactNode | ((copied: boolean) => ReactNode);
 };
 
-export const Copyable: React.FC<CopyableProps> = ({ copyText, name, className, children }) => {
+export const Copyable: React.FC<CopyableProps> = ({
+  copyText,
+  name,
+  className,
+  children,
+}) => {
   const [copied, setCopied] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
@@ -26,12 +31,14 @@ export const Copyable: React.FC<CopyableProps> = ({ copyText, name, className, c
     <HoverPopover root={true}>
       <HoverPopoverTrigger>
         <div className={className} onClick={handleClick} data-copied={copied}>
-          {typeof children === 'function' ? children(copied) : children}
+          {typeof children === "function" ? children(copied) : children}
         </div>
       </HoverPopoverTrigger>
 
       <HoverPopoverContent>
-        <div className="flex items-center gap-0.5">{(copied ? `Copied` : `Copy`) + ' ' + name}</div>
+        <div className="flex items-center gap-0.5">
+          {(copied ? `Copied` : `Copy`) + " " + name}
+        </div>
       </HoverPopoverContent>
     </HoverPopover>
   );

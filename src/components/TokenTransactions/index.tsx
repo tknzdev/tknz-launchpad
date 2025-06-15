@@ -1,22 +1,22 @@
-import { useTokenAddress, useTokenInfo } from '@/hooks/queries';
-import { useInfiniteQuery } from '@tanstack/react-query';
-import { memo, useEffect, useMemo, useState } from 'react';
-import { ApeQueries } from '../Explore/queries';
-import { TxTable } from './TxTable';
-import { columns } from './columns';
-import { Tx } from '../Explore/types';
+import { useTokenAddress, useTokenInfo } from "@/hooks/queries";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { memo, useEffect, useMemo, useState } from "react";
+import { ApeQueries } from "../Explore/queries";
+import { TxTable } from "./TxTable";
+import { columns } from "./columns";
+import { Tx } from "../Explore/types";
 
 export const TxnsTab: React.FC = memo(() => {
   const tokenId = useTokenAddress();
   const { data: symbol } = useTokenInfo((data) => data?.baseAsset.symbol);
 
   const { data, isFetching, fetchNextPage, hasNextPage } = useInfiniteQuery(
-    ApeQueries.tokenTxs({ id: tokenId })
+    ApeQueries.tokenTxs({ id: tokenId }),
   );
 
   const allRows = useMemo(
     () => (data && data.pages ? data.pages.flatMap((d) => d?.txs ?? []) : []),
-    [data]
+    [data],
   );
 
   // TODO: optimize re-renders, seems like tables re-render unnecessarily while paused
@@ -32,7 +32,9 @@ export const TxnsTab: React.FC = memo(() => {
 
   const pausedRows = useMemo(() => {
     const fetchedPages =
-      data && data.pages.length > 1 ? data.pages.slice(1).flatMap((d) => d?.txs ?? []) : [];
+      data && data.pages.length > 1
+        ? data.pages.slice(1).flatMap((d) => d?.txs ?? [])
+        : [];
     return [...pausedPage, ...fetchedPages];
   }, [data, pausedPage]);
 
@@ -50,4 +52,4 @@ export const TxnsTab: React.FC = memo(() => {
   );
 });
 
-TxnsTab.displayName = 'TxnsTab';
+TxnsTab.displayName = "TxnsTab";

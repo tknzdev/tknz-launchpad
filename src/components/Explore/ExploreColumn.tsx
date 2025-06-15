@@ -1,14 +1,29 @@
-import { useQueryClient } from '@tanstack/react-query';
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { categorySortBy, categorySortDir, createPoolSorter } from '@/components/Explore/pool-utils';
-import { ApeQueries, GemsTokenListQueryArgs, QueryData } from '@/components/Explore/queries';
-import { ExploreTab, TokenListSortByField, normalizeSortByField } from '@/components/Explore/types';
-import { TokenCardList } from '@/components/TokenCard/TokenCardList';
-import { useExploreGemsTokenList } from '@/hooks/useExploreGemsTokenList';
-import { EXPLORE_FIXED_TIMEFRAME, useExplore } from '@/contexts/ExploreProvider';
-import { Pool } from '@/contexts/types';
-import { isHoverableDevice, useBreakpoint } from '@/lib/device';
-import { PausedIndicator } from './PausedIndicator';
+import { useQueryClient } from "@tanstack/react-query";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
+import {
+  categorySortBy,
+  categorySortDir,
+  createPoolSorter,
+} from "@/components/Explore/pool-utils";
+import {
+  ApeQueries,
+  GemsTokenListQueryArgs,
+  QueryData,
+} from "@/components/Explore/queries";
+import {
+  ExploreTab,
+  TokenListSortByField,
+  normalizeSortByField,
+} from "@/components/Explore/types";
+import { TokenCardList } from "@/components/TokenCard/TokenCardList";
+import { useExploreGemsTokenList } from "@/hooks/useExploreGemsTokenList";
+import {
+  EXPLORE_FIXED_TIMEFRAME,
+  useExplore,
+} from "@/contexts/ExploreProvider";
+import { Pool } from "@/contexts/types";
+import { isHoverableDevice, useBreakpoint } from "@/lib/device";
+import { PausedIndicator } from "./PausedIndicator";
 
 type ExploreColumnProps = {
   tab: ExploreTab;
@@ -25,7 +40,7 @@ export const ExploreColumn: React.FC<ExploreColumnProps> = ({ tab }) => {
   const isPaused = pausedTabs[tab];
   const setIsPaused = useCallback(
     (paused: boolean) => setTabPaused(tab, paused),
-    [setTabPaused, tab]
+    [setTabPaused, tab],
   );
 
   return (
@@ -67,16 +82,19 @@ const TokenCardListContainer: React.FC<TokenCardListContainerProps> = memo(
   ({ tab, request, isPaused, setIsPaused }) => {
     const queryClient = useQueryClient();
     const breakpoint = useBreakpoint();
-    const isMobile = breakpoint === 'md' || breakpoint === 'sm' || breakpoint === 'xs';
+    const isMobile =
+      breakpoint === "md" || breakpoint === "sm" || breakpoint === "xs";
 
     const listRef = useRef<HTMLDivElement>(null);
 
-    const { data: currentData, status } = useExploreGemsTokenList((data) => data[tab]);
+    const { data: currentData, status } = useExploreGemsTokenList(
+      (data) => data[tab],
+    );
 
     const [snapshotData, setSnapshotData] = useState<Pool[]>();
 
     const handleMouseEnter = useCallback(() => {
-      if (!isHoverableDevice() || status !== 'success') {
+      if (!isHoverableDevice() || status !== "success") {
         return;
       }
 
@@ -98,7 +116,7 @@ const TokenCardListContainer: React.FC<TokenCardListContainerProps> = memo(
     useEffect(() => {
       queryClient.setQueriesData(
         {
-          type: 'active',
+          type: "active",
           queryKey: ApeQueries.gemsTokenList(request).queryKey,
         },
         (prev?: QueryData<typeof ApeQueries.gemsTokenList>) => {
@@ -120,7 +138,7 @@ const TokenCardListContainer: React.FC<TokenCardListContainerProps> = memo(
                 sortBy,
                 sortDir,
               },
-              timeframe
+              timeframe,
             );
             pools.sort(sorter);
           }
@@ -136,7 +154,7 @@ const TokenCardListContainer: React.FC<TokenCardListContainerProps> = memo(
               timeframe,
             },
           };
-        }
+        },
       );
     }, [queryClient, tab, request]);
 
@@ -163,9 +181,9 @@ const TokenCardListContainer: React.FC<TokenCardListContainerProps> = memo(
       // Initial check
       handleScroll();
 
-      window.addEventListener('scroll', handleScroll, { passive: true });
+      window.addEventListener("scroll", handleScroll, { passive: true });
       return () => {
-        window.removeEventListener('scroll', handleScroll);
+        window.removeEventListener("scroll", handleScroll);
         setIsPaused(false);
       };
     }, [isMobile, setIsPaused, handleScroll]);
@@ -174,7 +192,7 @@ const TokenCardListContainer: React.FC<TokenCardListContainerProps> = memo(
     const displayData = isPaused
       ? snapshotData?.map((snapshotPool) => {
           const current = currentData?.pools.find(
-            (p) => p.baseAsset.id === snapshotPool.baseAsset.id
+            (p) => p.baseAsset.id === snapshotPool.baseAsset.id,
           );
           if (current) {
             return current;
@@ -195,7 +213,7 @@ const TokenCardListContainer: React.FC<TokenCardListContainerProps> = memo(
         onMouseLeave={handleMouseLeave}
       />
     );
-  }
+  },
 );
 
-TokenCardListContainer.displayName = 'TokenCardListContainer';
+TokenCardListContainer.displayName = "TokenCardListContainer";

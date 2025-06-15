@@ -1,21 +1,21 @@
-import Decimal from 'decimal.js';
+import Decimal from "decimal.js";
 
 const getDecimalCount = (value: string) => {
-  const parts = value.split('.');
+  const parts = value.split(".");
   return parts.length > 1 ? parts[1].length : 0;
 };
 
 const userLocale =
-  typeof window !== 'undefined'
+  typeof window !== "undefined"
     ? navigator.languages && navigator.languages.length
       ? navigator.languages[0]
       : navigator.language
-    : 'en-US';
+    : "en-US";
 
 export const formatChartPrice = (
   val: number,
   precision?: number,
-  keepTrailingZeros = false
+  keepTrailingZeros = false,
 ): string => {
   // Use the default precision if not provided
   const defaultDecimals = getDecimalCount(val.toString());
@@ -23,8 +23,8 @@ export const formatChartPrice = (
 
   // Format the number according to user locale
   const numberFormatter = new Intl.NumberFormat(userLocale, {
-    notation: 'compact',
-    compactDisplay: 'short',
+    notation: "compact",
+    compactDisplay: "short",
     minimumSignificantDigits: 3,
     maximumSignificantDigits: 5,
     maximumFractionDigits: finalPrecision,
@@ -36,9 +36,20 @@ export const formatChartPrice = (
 };
 
 function generateSubscriptNumbers(x: number): string {
-  const subscriptNumbers: string[] = ['₀', '₁', '₂', '₃', '₄', '₅', '₆', '₇', '₈', '₉'];
+  const subscriptNumbers: string[] = [
+    "₀",
+    "₁",
+    "₂",
+    "₃",
+    "₄",
+    "₅",
+    "₆",
+    "₇",
+    "₈",
+    "₉",
+  ];
   const xString: string = x.toString();
-  let result: string = '';
+  let result: string = "";
 
   for (let i = 0; i < xString.length; i++) {
     const digit: number = parseInt(xString.charAt(i), 10);
@@ -56,7 +67,7 @@ export const formatNumber = {
   format: (val?: string | Decimal, precision?: number): string => {
     if (!val) {
       // TODO: why did we even do `--`, i blame zy
-      return '--';
+      return "--";
     }
 
     // Use the default precision if not provided
@@ -72,16 +83,21 @@ export const formatNumber = {
 // To find out the precision we should use
 export const getPrecisionTick = (
   value: number,
-  maxSuffix: number = 6
+  maxSuffix: number = 6,
 ): [number, string, string] => {
-  if (value === 0) return [0, '0', '0'];
+  if (value === 0) return [0, "0", "0"];
 
-  const firstSD = Decimal.ceil(new Decimal(-1).mul(Decimal.log10(Decimal.abs(value)))).toNumber();
+  const firstSD = Decimal.ceil(
+    new Decimal(-1).mul(Decimal.log10(Decimal.abs(value))),
+  ).toNumber();
 
   // When value is greater than 0
   if (new Decimal(value).gte(0.000_1)) {
-    const [integer, decimals] = new Decimal(value).toSignificantDigits(4).toFixed().split('.');
-    return [0, integer || '', decimals || ''];
+    const [integer, decimals] = new Decimal(value)
+      .toSignificantDigits(4)
+      .toFixed()
+      .split(".");
+    return [0, integer || "", decimals || ""];
   }
 
   // When value is less than 0
@@ -111,5 +127,7 @@ export const getPrecisionTickSizeText = ({
     return value.toFixed(suffix.length);
   }
 
-  return '0.0' + generateSubscriptNumbers(firstSD - 1) + suffix.slice(0, maxSuffix);
+  return (
+    "0.0" + generateSubscriptNumbers(firstSD - 1) + suffix.slice(0, maxSuffix)
+  );
 };

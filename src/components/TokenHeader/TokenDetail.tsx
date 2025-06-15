@@ -1,9 +1,9 @@
-import { useTokenAddress } from '@/hooks/queries';
-import { TokenDescription } from './TokenDescription';
-import { BondingCurve } from './BondingCurve';
+import { useTokenAddress } from "@/hooks/queries";
+import { TokenDescription } from "./TokenDescription";
+import { BondingCurve } from "./BondingCurve";
 
-import { TokenMetrics } from './TokenMetrics';
-import { Checklist } from './TokenChecklist';
+import { TokenMetrics } from "./TokenMetrics";
+import { Checklist } from "./TokenChecklist";
 
 export const TokenDetails: React.FC = () => {
   const tokenId = useTokenAddress();

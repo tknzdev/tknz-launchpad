@@ -1,42 +1,51 @@
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from "@tanstack/react-query";
 import {
   categorySortBy,
   categorySortDir,
   createPoolSorter,
   patchStreamPool,
-} from '@/components/Explore/pool-utils';
-import { ApeQueries, QueryData } from '@/components/Explore/queries';
-import { useDataStreamListener } from '@/contexts/DataStreamProvider';
-import { ExploreTab, TokenListSortByField, normalizeSortByField } from '@/components/Explore/types';
-import { assertNever } from '@/lib/utils';
+} from "@/components/Explore/pool-utils";
+import { ApeQueries, QueryData } from "@/components/Explore/queries";
+import { useDataStreamListener } from "@/contexts/DataStreamProvider";
+import {
+  ExploreTab,
+  TokenListSortByField,
+  normalizeSortByField,
+} from "@/components/Explore/types";
+import { assertNever } from "@/lib/utils";
 
 export const ExploreMsgHandler: React.FC = () => {
   const queryClient = useQueryClient();
 
-  useDataStreamListener(['updates'], (get, set, msg) => {
+  useDataStreamListener(["updates"], (get, set, msg) => {
     queryClient.setQueriesData(
       {
-        type: 'active',
-        queryKey: ['explore', 'gems'],
+        type: "active",
+        queryKey: ["explore", "gems"],
       },
       (prev?: QueryData<typeof ApeQueries.gemsTokenList>) => {
         if (!prev) return;
 
         // Update, insert then re-sort
         let recentPools = prev.recent && [...prev.recent.pools];
-        let aboutToGraduatePools = prev.aboutToGraduate && [...prev.aboutToGraduate.pools];
+        let aboutToGraduatePools = prev.aboutToGraduate && [
+          ...prev.aboutToGraduate.pools,
+        ];
         const graduatedPools = prev.graduated && [...prev.graduated.pools];
 
         for (const update of msg.data) {
-          if (update.type === 'new') {
+          if (update.type === "new") {
             // Handle recent pools
             // Update or add
             if (recentPools) {
               const newIdx = recentPools?.findIndex(
-                (p) => p.baseAsset.id === update.pool.baseAsset.id
+                (p) => p.baseAsset.id === update.pool.baseAsset.id,
               );
               if (newIdx !== -1) {
-                recentPools[newIdx] = patchStreamPool(update.pool, recentPools[newIdx]);
+                recentPools[newIdx] = patchStreamPool(
+                  update.pool,
+                  recentPools[newIdx],
+                );
               } else {
                 Object.assign(update.pool, { streamed: true });
                 recentPools.push(update.pool);
@@ -48,15 +57,16 @@ export const ExploreMsgHandler: React.FC = () => {
             if (aboutToGraduatePools && !update.pool.baseAsset.graduatedPool) {
               // Already sorted by bonding curve
               const minBondingCurve =
-                aboutToGraduatePools[aboutToGraduatePools.length - 1]?.bondingCurve ?? 0;
+                aboutToGraduatePools[aboutToGraduatePools.length - 1]
+                  ?.bondingCurve ?? 0;
 
               const aboutToGraduateIdx = aboutToGraduatePools.findIndex(
-                (p) => p.baseAsset.id === update.pool.baseAsset.id
+                (p) => p.baseAsset.id === update.pool.baseAsset.id,
               );
               if (aboutToGraduateIdx !== -1) {
                 aboutToGraduatePools[aboutToGraduateIdx] = patchStreamPool(
                   update.pool,
-                  aboutToGraduatePools[aboutToGraduateIdx]
+                  aboutToGraduatePools[aboutToGraduateIdx],
                 );
               } else if (
                 update.pool.bondingCurve !== undefined &&
@@ -71,17 +81,17 @@ export const ExploreMsgHandler: React.FC = () => {
             continue;
           }
 
-          if (update.type === 'graduated') {
+          if (update.type === "graduated") {
             // Handle graduated pools
             // Update or add
             if (graduatedPools) {
               const graduatedIdx = graduatedPools.findIndex(
-                (p) => p.baseAsset.id === update.pool.baseAsset.id
+                (p) => p.baseAsset.id === update.pool.baseAsset.id,
               );
               if (graduatedIdx !== -1) {
                 graduatedPools[graduatedIdx] = patchStreamPool(
                   update.pool,
-                  graduatedPools[graduatedIdx]
+                  graduatedPools[graduatedIdx],
                 );
               } else {
                 Object.assign(update.pool, { streamed: true });
@@ -92,11 +102,13 @@ export const ExploreMsgHandler: React.FC = () => {
             // Handle other columns
             // Remove from other columns
             if (recentPools) {
-              recentPools = recentPools.filter((p) => p.baseAsset.id !== update.pool.baseAsset.id);
+              recentPools = recentPools.filter(
+                (p) => p.baseAsset.id !== update.pool.baseAsset.id,
+              );
             }
             if (aboutToGraduatePools) {
               aboutToGraduatePools = aboutToGraduatePools.filter(
-                (p) => p.baseAsset.id !== update.pool.baseAsset.id
+                (p) => p.baseAsset.id !== update.pool.baseAsset.id,
               );
             }
 
@@ -104,7 +116,7 @@ export const ExploreMsgHandler: React.FC = () => {
             continue;
           }
 
-          if (update.type === 'update') {
+          if (update.type === "update") {
             // Skip unreliable pool updates, theres a bug where mcap is missing
             if (update.pool.isUnreliable) {
               continue;
@@ -114,9 +126,14 @@ export const ExploreMsgHandler: React.FC = () => {
             // Handle recent pools
             // Update existing
             if (recentPools) {
-              const idx = recentPools.findIndex((p) => p.baseAsset.id === update.pool.baseAsset.id);
+              const idx = recentPools.findIndex(
+                (p) => p.baseAsset.id === update.pool.baseAsset.id,
+              );
               if (idx !== -1) {
-                recentPools[idx] = patchStreamPool(update.pool, recentPools[idx]);
+                recentPools[idx] = patchStreamPool(
+                  update.pool,
+                  recentPools[idx],
+                );
               }
             }
 
@@ -124,14 +141,18 @@ export const ExploreMsgHandler: React.FC = () => {
             // Update or add if higher bonding curve
             if (aboutToGraduatePools && !update.pool.baseAsset.graduatedPool) {
               const idx = aboutToGraduatePools.findIndex(
-                (p) => p.baseAsset.id === update.pool.baseAsset.id
+                (p) => p.baseAsset.id === update.pool.baseAsset.id,
               );
               if (idx !== -1) {
-                aboutToGraduatePools[idx] = patchStreamPool(update.pool, aboutToGraduatePools[idx]);
+                aboutToGraduatePools[idx] = patchStreamPool(
+                  update.pool,
+                  aboutToGraduatePools[idx],
+                );
               } else {
                 // Already sorted by bonding curve
                 const minBondingCurve =
-                  aboutToGraduatePools[aboutToGraduatePools.length - 1]?.bondingCurve ?? 0;
+                  aboutToGraduatePools[aboutToGraduatePools.length - 1]
+                    ?.bondingCurve ?? 0;
                 if (
                   update.pool.bondingCurve !== undefined &&
                   update.pool.bondingCurve > minBondingCurve
@@ -146,10 +167,13 @@ export const ExploreMsgHandler: React.FC = () => {
             // Update existing
             if (graduatedPools) {
               const idx = graduatedPools.findIndex(
-                (p) => p.baseAsset.id === update.pool.baseAsset.id
+                (p) => p.baseAsset.id === update.pool.baseAsset.id,
               );
               if (idx !== -1) {
-                graduatedPools[idx] = patchStreamPool(update.pool, graduatedPools[idx]);
+                graduatedPools[idx] = patchStreamPool(
+                  update.pool,
+                  graduatedPools[idx],
+                );
               }
             }
 
@@ -157,7 +181,10 @@ export const ExploreMsgHandler: React.FC = () => {
             continue;
           }
 
-          assertNever(update.type, 'Explore stream listener received unknown update type');
+          assertNever(
+            update.type,
+            "Explore stream listener received unknown update type",
+          );
         }
 
         const recentArgs = prev.args[ExploreTab.NEW];
@@ -169,7 +196,10 @@ export const ExploreMsgHandler: React.FC = () => {
           const sortDir = categorySortDir(ExploreTab.NEW);
           let sortBy: TokenListSortByField | undefined;
           if (!sortBy) {
-            const defaultSortBy = categorySortBy(ExploreTab.NEW, recentArgs.timeframe);
+            const defaultSortBy = categorySortBy(
+              ExploreTab.NEW,
+              recentArgs.timeframe,
+            );
             if (defaultSortBy) {
               sortBy = normalizeSortByField(defaultSortBy);
             }
@@ -181,7 +211,7 @@ export const ExploreMsgHandler: React.FC = () => {
                 sortBy,
                 sortDir,
               },
-              recentArgs.timeframe
+              recentArgs.timeframe,
             );
             recentPools.sort(sorter);
           }
@@ -193,7 +223,7 @@ export const ExploreMsgHandler: React.FC = () => {
           if (!sortBy) {
             const defaultSortBy = categorySortBy(
               ExploreTab.GRADUATING,
-              aboutToGraduateArgs.timeframe
+              aboutToGraduateArgs.timeframe,
             );
             if (defaultSortBy) {
               sortBy = normalizeSortByField(defaultSortBy);
@@ -206,7 +236,7 @@ export const ExploreMsgHandler: React.FC = () => {
                 sortBy,
                 sortDir,
               },
-              aboutToGraduateArgs.timeframe
+              aboutToGraduateArgs.timeframe,
             );
             aboutToGraduatePools.sort(sorter);
           }
@@ -216,7 +246,10 @@ export const ExploreMsgHandler: React.FC = () => {
           const sortDir = categorySortDir(ExploreTab.GRADUATED);
           let sortBy: TokenListSortByField | undefined;
           if (!sortBy) {
-            const defaultSortBy = categorySortBy(ExploreTab.GRADUATED, graduatedArgs.timeframe);
+            const defaultSortBy = categorySortBy(
+              ExploreTab.GRADUATED,
+              graduatedArgs.timeframe,
+            );
             if (defaultSortBy) {
               sortBy = normalizeSortByField(defaultSortBy);
             }
@@ -228,7 +261,7 @@ export const ExploreMsgHandler: React.FC = () => {
                 sortBy,
                 sortDir,
               },
-              graduatedArgs.timeframe
+              graduatedArgs.timeframe,
             );
             graduatedPools.sort(sorter);
           }
@@ -244,12 +277,14 @@ export const ExploreMsgHandler: React.FC = () => {
           [ExploreTab.GRADUATING]: aboutToGraduatePools
             ? { pools: aboutToGraduatePools }
             : undefined,
-          [ExploreTab.GRADUATED]: graduatedPools ? { pools: graduatedPools } : undefined,
+          [ExploreTab.GRADUATED]: graduatedPools
+            ? { pools: graduatedPools }
+            : undefined,
           args: prev.args,
         };
 
         return next;
-      }
+      },
     );
   });
   return null;

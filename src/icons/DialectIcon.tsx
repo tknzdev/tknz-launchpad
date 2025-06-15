@@ -1,6 +1,6 @@
-import React from 'react';
+import React from "react";
 
-import { IconProps } from './types';
+import { IconProps } from "./types";
 
 export const DialectIcon: React.FC<IconProps> = (props) => {
   return (
@@ -21,7 +21,12 @@ export const DialectIcon: React.FC<IconProps> = (props) => {
       </g>
       <defs>
         <clipPath id="clip0_101_19">
-          <rect width="165" height="150" fill="white" transform="translate(67 75)" />
+          <rect
+            width="165"
+            height="150"
+            fill="white"
+            transform="translate(67 75)"
+          />
         </clipPath>
       </defs>
     </svg>

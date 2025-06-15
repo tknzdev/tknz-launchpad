@@ -1,41 +1,41 @@
-import { Tx } from '@/components/Explore/types';
-import { Pool } from '../types';
+import { Tx } from "@/components/Explore/types";
+import { Pool } from "../types";
 
 export type StreamRequest =
   | {
-      type: 'subscribe:pool' | 'unsubscribe:pool';
+      type: "subscribe:pool" | "unsubscribe:pool";
       pools: string[];
     }
   | {
-      type: 'subscribe:txns' | 'unsubscribe:txns';
+      type: "subscribe:txns" | "unsubscribe:txns";
       assets: string[];
     }
   | {
-      type: 'subscribe:recent' | 'unsubscribe:recent';
+      type: "subscribe:recent" | "unsubscribe:recent";
       filters?: {
         partnerConfigs: string[];
       };
     }
   | {
-      type: 'subscribe:prices' | 'unsubscribe:prices';
+      type: "subscribe:prices" | "unsubscribe:prices";
       assets: string[];
     };
 
 type StreamUpdatesResponse = {
-  type: 'updates';
+  type: "updates";
   data: {
-    type: 'new' | 'update' | 'graduated';
+    type: "new" | "update" | "graduated";
     pool: Pool;
   }[];
 };
 
 type StreamActionsResponse = {
-  type: 'actions';
+  type: "actions";
   data: Tx[];
 };
 
 type StreamAssetPricesResponse = {
-  type: 'prices';
+  type: "prices";
   data: {
     blockId: number;
     assetId: string;

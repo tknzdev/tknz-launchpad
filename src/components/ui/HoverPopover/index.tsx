@@ -1,8 +1,8 @@
-import { Popover as PopoverPrimitive } from 'radix-ui';
-import { forwardRef } from 'react';
+import { Popover as PopoverPrimitive } from "radix-ui";
+import { forwardRef } from "react";
 
-import { HoverPopover, useHoverPopover } from './context';
-import { cn } from '@/lib/utils';
+import { HoverPopover, useHoverPopover } from "./context";
+import { cn } from "@/lib/utils";
 
 /**
  * Wrapper for radix-ui popover trigger component.
@@ -20,7 +20,7 @@ const HoverPopoverTrigger = forwardRef<
   const { handleMouseEnter, handleMouseLeave, open } = useHoverPopover();
   return (
     <PopoverPrimitive.Trigger
-      className={cn('outline-none', className, { 'z-50': open })}
+      className={cn("outline-none", className, { "z-50": open })}
       {...props}
       onMouseLeave={handleMouseLeave}
       onMouseEnter={handleMouseEnter}
@@ -80,7 +80,7 @@ const HoverPopoverContent = forwardRef<
       children,
       ...props
     },
-    ref
+    ref,
   ) => {
     const { handleMouseEnter, handleMouseLeave, open } = useHoverPopover();
 
@@ -88,10 +88,10 @@ const HoverPopoverContent = forwardRef<
       <>
         {backdrop && open && (
           <div
-            className={cn('fixed inset-0 z-10 bg-black/10 backdrop-blur-sm', {
-              'animate-fade-in': open,
-              'animate-fade-out': !open,
-              'pointer-events-none': !backdropClickable,
+            className={cn("fixed inset-0 z-10 bg-black/10 backdrop-blur-sm", {
+              "animate-fade-in": open,
+              "animate-fade-out": !open,
+              "pointer-events-none": !backdropClickable,
             })}
           />
         )}
@@ -99,8 +99,8 @@ const HoverPopoverContent = forwardRef<
           ref={ref}
           {...props}
           className={cn(
-            'z-50 w-full max-w-[360px] rounded-lg bg-black p-2 text-xs text-white outline-none',
-            className
+            "z-50 w-full max-w-[360px] rounded-lg bg-black p-2 text-xs text-white outline-none",
+            className,
           )}
           onMouseEnter={retainOnContentHover ? handleMouseEnter : undefined}
           onMouseLeave={handleMouseLeave}
@@ -110,11 +110,19 @@ const HoverPopoverContent = forwardRef<
       </>
     );
 
-    return <>{portal ? <PopoverPrimitive.Portal>{content}</PopoverPrimitive.Portal> : content}</>;
-  }
+    return (
+      <>
+        {portal ? (
+          <PopoverPrimitive.Portal>{content}</PopoverPrimitive.Portal>
+        ) : (
+          content
+        )}
+      </>
+    );
+  },
 );
 
 // Add display name for better debugging
-HoverPopoverContent.displayName = 'HoverPopoverContent';
+HoverPopoverContent.displayName = "HoverPopoverContent";
 
 export { HoverPopover, HoverPopoverContent, HoverPopoverTrigger };

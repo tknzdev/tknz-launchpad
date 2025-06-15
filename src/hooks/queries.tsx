@@ -1,8 +1,8 @@
-import { useRouter } from 'next/router';
-import { NATIVE_MINT } from '@solana/spl-token';
-import { ApeQueries, QueryData } from '@/components/Explore/queries';
-import { useQuery } from '@tanstack/react-query';
-import { formatPoolAsTokenInfo } from '@/components/Explore/pool-utils';
+import { useRouter } from "next/router";
+import { NATIVE_MINT } from "@solana/spl-token";
+import { ApeQueries, QueryData } from "@/components/Explore/queries";
+import { useQuery } from "@tanstack/react-query";
+import { formatPoolAsTokenInfo } from "@/components/Explore/pool-utils";
 
 export function useTokenAddress() {
   const router = useRouter();
@@ -12,7 +12,7 @@ export function useTokenAddress() {
 }
 
 export function useTokenInfo<T = QueryData<typeof ApeQueries.tokenInfo>>(
-  select?: (data: QueryData<typeof ApeQueries.tokenInfo>) => T
+  select?: (data: QueryData<typeof ApeQueries.tokenInfo>) => T,
 ) {
   const tokenId = useTokenAddress();
   return useQuery({

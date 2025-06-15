@@ -1,5 +1,5 @@
-import React from 'react';
-import { IconProps } from './types';
+import React from "react";
+import { IconProps } from "./types";
 
 export const RaydiumIcon: React.FC<IconProps> = (props) => {
   return (

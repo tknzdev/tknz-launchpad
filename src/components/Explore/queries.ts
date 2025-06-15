@@ -1,4 +1,4 @@
-import { ApeClient } from '@/components/Explore/client';
+import { ApeClient } from "@/components/Explore/client";
 import {
   GetGemsTokenListRequest,
   GetTxsResponse,
@@ -8,7 +8,7 @@ import {
   TokenListSortDir,
   TokenListTimeframe,
   resolveTokenListFilters,
-} from './types';
+} from "./types";
 
 export type QueryData<T> = T extends (...args: infer OptionsArgs) => {
   queryFn: (...args: infer Args) => Promise<infer R>;
@@ -51,7 +51,7 @@ export const ApeQueries = {
     };
 
     return {
-      queryKey: ['explore', 'gems', args],
+      queryKey: ["explore", "gems", args],
       queryFn: async () => {
         const res = await ApeClient.getGemsTokenList(req);
         return Object.assign(res, { args });
@@ -60,11 +60,11 @@ export const ApeQueries = {
   },
   tokenInfo: (args: { id: string }) => {
     return {
-      queryKey: ['explore', 'token', args.id, 'info'],
+      queryKey: ["explore", "token", args.id, "info"],
       queryFn: async () => {
         const info = await ApeClient.getToken({ id: args.id });
         if (!info?.pools[0]) {
-          throw new Error('No token info found');
+          throw new Error("No token info found");
         }
         return info?.pools[0];
       },
@@ -72,7 +72,7 @@ export const ApeQueries = {
   },
   tokenDescription: (args: { id: string }) => {
     return {
-      queryKey: ['explore', 'token', args.id, 'description'],
+      queryKey: ["explore", "token", args.id, "description"],
       queryFn: async () => {
         const res = await ApeClient.getTokenDescription(args.id);
         return res;
@@ -81,7 +81,7 @@ export const ApeQueries = {
   },
   tokenTxs: (args: { id: string }) => {
     return {
-      queryKey: ['explore', 'token', args.id, 'txs'],
+      queryKey: ["explore", "token", args.id, "txs"],
       queryFn: async ({ signal, pageParam }: any) => {
         const res = await ApeClient.getTokenTxs(
           args.id,
@@ -90,7 +90,7 @@ export const ApeQueries = {
                 ...pageParam,
               }
             : {},
-          { signal }
+          { signal },
         );
         return Object.assign(res, {
           args,

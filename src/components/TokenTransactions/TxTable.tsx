@@ -6,19 +6,33 @@ import {
   getCoreRowModel,
   getFilteredRowModel,
   useReactTable,
-} from '@tanstack/react-table';
-import { notUndefined, useVirtualizer } from '@tanstack/react-virtual';
-import { useAtom } from 'jotai';
-import { PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { DateMode, dateModeAtom } from './datemode';
-import { useWallet } from '@jup-ag/wallet-adapter';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../Table';
-import { cn } from '@/lib/utils';
-import { PausedIndicator } from '../Explore/PausedIndicator';
-import { isHoverableDevice } from '@/lib/device';
-import { SkeletonTableRows } from './columns';
+} from "@tanstack/react-table";
+import { notUndefined, useVirtualizer } from "@tanstack/react-virtual";
+import { useAtom } from "jotai";
+import {
+  PropsWithChildren,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { DateMode, dateModeAtom } from "./datemode";
+import { useWallet } from "@jup-ag/wallet-adapter";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../Table";
+import { cn } from "@/lib/utils";
+import { PausedIndicator } from "../Explore/PausedIndicator";
+import { isHoverableDevice } from "@/lib/device";
+import { SkeletonTableRows } from "./columns";
 
-declare module '@tanstack/react-table' {
+declare module "@tanstack/react-table" {
   interface TableMeta<TData extends RowData> {
     dateMode: DateMode;
     setDateMode: (mode: DateMode) => void;
@@ -90,14 +104,18 @@ export function TxTable<TData, TValue>({
     overscan: 5,
     // Memoisation is REQUIRED to optimise rendering
     // @see https://tanstack.com/virtual/v3/docs/api/virtualizer#getitemkey
-    getItemKey: useCallback((index: number) => rows[index]?.id ?? index, [rows]),
+    getItemKey: useCallback(
+      (index: number) => rows[index]?.id ?? index,
+      [rows],
+    ),
   });
   const items = virtualizer.getVirtualItems();
   const [before, after] =
     items.length > 0
       ? [
           notUndefined(items[0]).start - virtualizer.options.scrollMargin,
-          virtualizer.getTotalSize() - notUndefined(items[items.length - 1]).end,
+          virtualizer.getTotalSize() -
+            notUndefined(items[items.length - 1]).end,
         ]
       : [0, 0];
 
@@ -119,11 +137,11 @@ export function TxTable<TData, TValue>({
 
   useEffect(() => {
     const tableEl = tableRef.current;
-    tableEl?.parentElement?.addEventListener('scroll', onScroll, {
+    tableEl?.parentElement?.addEventListener("scroll", onScroll, {
       passive: true,
     });
     return () => {
-      tableEl?.parentElement?.removeEventListener('scroll', onScroll);
+      tableEl?.parentElement?.removeEventListener("scroll", onScroll);
     };
   }, [onScroll]);
 
@@ -147,22 +165,30 @@ export function TxTable<TData, TValue>({
                       colSpan={header.colSpan}
                       style={{ width: header.getSize() }}
                       className={cn({
-                        'max-lg:hidden': header.id === 'type',
-                        'max-sm:hidden': header.id === 'traderAddress' || header.id === 'txHash',
+                        "max-lg:hidden": header.id === "type",
+                        "max-sm:hidden":
+                          header.id === "traderAddress" ||
+                          header.id === "txHash",
                       })}
                     >
-                      {header.id === 'timestamp' ? (
+                      {header.id === "timestamp" ? (
                         paused ? (
                           <div className="flex h-full items-center">
                             <PausedIndicator />
                           </div>
                         ) : !header.isPlaceholder ? (
-                          flexRender(header.column.columnDef.header, header.getContext())
+                          flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )
                         ) : null
-                      ) : header.id === 'returnAmount' ? (
+                      ) : header.id === "returnAmount" ? (
                         <div className="text-right">{symbol}</div>
                       ) : !header.isPlaceholder ? (
-                        flexRender(header.column.columnDef.header, header.getContext())
+                        flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )
                       ) : null}
                     </TableHead>
                   );
@@ -198,10 +224,10 @@ export function TxTable<TData, TValue>({
                   return (
                     <TableRow
                       key={row.id}
-                      data-state={row.getIsSelected() && 'selected'}
+                      data-state={row.getIsSelected() && "selected"}
                       className={cn({
-                        'text-emerald': row.getValue('type') === 'buy',
-                        'text-rose': row.getValue('type') === 'sell',
+                        "text-emerald": row.getValue("type") === "buy",
+                        "text-rose": row.getValue("type") === "sell",
                       })}
                       style={{
                         height: `${virtualRow.size}px`,
@@ -211,12 +237,16 @@ export function TxTable<TData, TValue>({
                         <TableCell
                           key={cell.id}
                           className={cn({
-                            'max-lg:hidden': cell.column.id === 'type',
-                            'max-sm:hidden':
-                              cell.column.id === 'traderAddress' || cell.column.id === 'txHash',
+                            "max-lg:hidden": cell.column.id === "type",
+                            "max-sm:hidden":
+                              cell.column.id === "traderAddress" ||
+                              cell.column.id === "txHash",
                           })}
                         >
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
                         </TableCell>
                       ))}
                     </TableRow>
@@ -225,7 +255,9 @@ export function TxTable<TData, TValue>({
 
                 {/* Next page loading indicator */}
                 {isFetching ? (
-                  <MessageRow colSpan={columns.length}>Loading txs...</MessageRow>
+                  <MessageRow colSpan={columns.length}>
+                    Loading txs...
+                  </MessageRow>
                 ) : null}
               </>
             ) : isFetching ? (
@@ -255,7 +287,10 @@ export function TxTable<TData, TValue>({
 type MessageRowProps = {
   colSpan: number;
 };
-const MessageRow: React.FC<PropsWithChildren<MessageRowProps>> = ({ colSpan, children }) => {
+const MessageRow: React.FC<PropsWithChildren<MessageRowProps>> = ({
+  colSpan,
+  children,
+}) => {
   return (
     <tr>
       <td className="table-cell h-10 text-neutral-500" colSpan={colSpan}>

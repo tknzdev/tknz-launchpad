@@ -1,17 +1,24 @@
-import { QueryStatus } from '@tanstack/react-query';
-import React, { forwardRef, memo, useCallback, useEffect, useRef, useState } from 'react';
+import { QueryStatus } from "@tanstack/react-query";
+import React, {
+  forwardRef,
+  memo,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
-import { Pool, TokenListTimeframe } from '../Explore/types';
-import { useDataStream } from '@/contexts/DataStreamProvider';
-import { cn } from '@/lib/utils';
-import { TokenCard } from './TokenCard';
-import { TokenCardSkeleton } from './TokenCard';
+import { Pool, TokenListTimeframe } from "../Explore/types";
+import { useDataStream } from "@/contexts/DataStreamProvider";
+import { cn } from "@/lib/utils";
+import { TokenCard } from "./TokenCard";
+import { TokenCardSkeleton } from "./TokenCard";
 
 const ROWS_OVERSCAN = 0;
 const ROW_HEIGHT_ESTIMATE = 90; // px for cards
 const SKELETON_COUNT = 5;
 
-type TokenCardListProps = React.ComponentPropsWithoutRef<'div'> & {
+type TokenCardListProps = React.ComponentPropsWithoutRef<"div"> & {
   data?: Pool[];
   status: QueryStatus;
   timeframe: TokenListTimeframe;
@@ -21,8 +28,13 @@ type TokenCardListProps = React.ComponentPropsWithoutRef<'div'> & {
 
 export const TokenCardList = memo(
   forwardRef<HTMLDivElement, TokenCardListProps>(
-    ({ timeframe, data, status, trackPools, emptyState, className, ...props }, ref) => {
-      const [visiblePoolIds, setVisiblePoolIds] = useState<Set<string>>(() => new Set());
+    (
+      { timeframe, data, status, trackPools, emptyState, className, ...props },
+      ref,
+    ) => {
+      const [visiblePoolIds, setVisiblePoolIds] = useState<Set<string>>(
+        () => new Set(),
+      );
       const poolElements = useRef(new Map<string, Element>());
       const observer = useRef<IntersectionObserver | undefined>(undefined);
 
@@ -44,22 +56,25 @@ export const TokenCardList = memo(
           {
             rootMargin: `${ROW_HEIGHT_ESTIMATE * ROWS_OVERSCAN}px`,
             threshold: 0.1,
-          }
+          },
         );
         observer.current = newObserver;
 
         return () => newObserver.disconnect();
       }, []);
 
-      const rowRef = useCallback((element: HTMLElement | null, poolId: string) => {
-        if (!element) {
-          poolElements.current.delete(poolId);
-          return;
-        }
+      const rowRef = useCallback(
+        (element: HTMLElement | null, poolId: string) => {
+          if (!element) {
+            poolElements.current.delete(poolId);
+            return;
+          }
 
-        poolElements.current.set(poolId, element);
-        observer.current?.observe(element);
-      }, []);
+          poolElements.current.set(poolId, element);
+          observer.current?.observe(element);
+        },
+        [],
+      );
 
       const { subscribePools, unsubscribePools } = useDataStream();
       useEffect(() => {
@@ -74,10 +89,10 @@ export const TokenCardList = memo(
       return (
         <div
           ref={ref}
-          className={cn('relative flex flex-col overflow-y-auto', className)}
+          className={cn("relative flex flex-col overflow-y-auto", className)}
           {...props}
         >
-          {status === 'loading' ? (
+          {status === "loading" ? (
             new Array(SKELETON_COUNT).fill(0).map((_, i) => (
               <TokenCardSkeleton
                 key={`skeleton-${i}`}
@@ -89,7 +104,9 @@ export const TokenCardList = memo(
           ) : !data || data.length === 0 ? (
             (emptyState ?? (
               <div className="col-span-full py-12 text-center">
-                <div className="text-neutral-500">No tokens matching this criteria</div>
+                <div className="text-neutral-500">
+                  No tokens matching this criteria
+                </div>
                 <div className="text-neutral-600">Adjust filters!</div>
               </div>
             ))
@@ -107,6 +124,6 @@ export const TokenCardList = memo(
           )}
         </div>
       );
-    }
-  )
+    },
+  ),
 );

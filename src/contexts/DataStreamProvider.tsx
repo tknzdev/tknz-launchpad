@@ -1,18 +1,24 @@
-import { ApeQueries, QueryData } from '@/components/Explore/queries';
-import { atomMsgWithListeners } from '@/lib/jotai';
-import { InfiniteData, useQueryClient } from '@tanstack/react-query';
-import { useSetAtom } from 'jotai';
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef } from 'react';
-import { StreamRequest, StreamResponse } from './TokenChart/msg';
-import { delay } from '@/lib/utils';
+import { ApeQueries, QueryData } from "@/components/Explore/queries";
+import { atomMsgWithListeners } from "@/lib/jotai";
+import { InfiniteData, useQueryClient } from "@tanstack/react-query";
+import { useSetAtom } from "jotai";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
+import { StreamRequest, StreamResponse } from "./TokenChart/msg";
+import { delay } from "@/lib/utils";
 
-const WS_URL = 'wss://trench-stream.jup.ag/ws';
+const WS_URL = "wss://trench-stream.jup.ag/ws";
 
 const RECONNECT_DELAY_MILLIS = 2_500;
 
-const [dataStreamMsgAtom, useDataStreamListener] = atomMsgWithListeners<StreamResponse | null>(
-  null
-);
+const [dataStreamMsgAtom, useDataStreamListener] =
+  atomMsgWithListeners<StreamResponse | null>(null);
 export { useDataStreamListener };
 
 type DataStreamContextType = {
@@ -26,11 +32,15 @@ type DataStreamContextType = {
 
 const DataStreamContext = createContext<DataStreamContextType | null>(null);
 
-export const DataStreamProvider = ({ children }: { children: React.ReactNode }) => {
+export const DataStreamProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const queryClient = useQueryClient();
   const partnerConfigs = useMemo(
-    () => process.env.NEXT_PUBLIC_POOL_CONFIG_KEY?.split(',') || [],
-    []
+    () => process.env.NEXT_PUBLIC_POOL_CONFIG_KEY?.split(",") || [],
+    [],
   );
   const setDataStreamMsg = useSetAtom(dataStreamMsgAtom);
 
@@ -46,11 +56,11 @@ export const DataStreamProvider = ({ children }: { children: React.ReactNode }) 
     if (ws?.current?.readyState === WebSocket.OPEN) {
       ws.current.send(
         createRequest({
-          type: 'subscribe:recent',
+          type: "subscribe:recent",
           filters: {
             partnerConfigs,
           },
-        })
+        }),
       );
     }
   }, [partnerConfigs]);
@@ -59,7 +69,7 @@ export const DataStreamProvider = ({ children }: { children: React.ReactNode }) 
     subRecentTokenList.current = false;
 
     if (ws?.current?.readyState === WebSocket.OPEN) {
-      ws.current.send(createRequest({ type: 'unsubscribe:recent' }));
+      ws.current.send(createRequest({ type: "unsubscribe:recent" }));
     }
   }, []);
 
@@ -69,7 +79,7 @@ export const DataStreamProvider = ({ children }: { children: React.ReactNode }) 
     }
 
     if (ws?.current?.readyState === WebSocket.OPEN) {
-      ws.current.send(createRequest({ type: 'subscribe:pool', pools: pools }));
+      ws.current.send(createRequest({ type: "subscribe:pool", pools: pools }));
     }
   }, []);
 
@@ -78,7 +88,9 @@ export const DataStreamProvider = ({ children }: { children: React.ReactNode }) 
       subPools.current.delete(pool);
     }
     if (ws?.current?.readyState === WebSocket.OPEN) {
-      ws.current.send(createRequest({ type: 'unsubscribe:pool', pools: pools }));
+      ws.current.send(
+        createRequest({ type: "unsubscribe:pool", pools: pools }),
+      );
     }
   }, []);
 
@@ -87,7 +99,9 @@ export const DataStreamProvider = ({ children }: { children: React.ReactNode }) 
       subTxnsAssets.current.add(asset);
     }
     if (ws?.current?.readyState === WebSocket.OPEN) {
-      ws.current.send(createRequest({ type: 'subscribe:txns', assets: assets }));
+      ws.current.send(
+        createRequest({ type: "subscribe:txns", assets: assets }),
+      );
     }
   }, []);
 
@@ -96,7 +110,9 @@ export const DataStreamProvider = ({ children }: { children: React.ReactNode }) 
       subTxnsAssets.current.delete(asset);
     }
     if (ws?.current?.readyState === WebSocket.OPEN) {
-      ws.current.send(createRequest({ type: 'unsubscribe:txns', assets: assets }));
+      ws.current.send(
+        createRequest({ type: "unsubscribe:txns", assets: assets }),
+      );
     }
   }, []);
 
@@ -147,12 +163,12 @@ export const DataStreamProvider = ({ children }: { children: React.ReactNode }) 
       setDataStreamMsg(msg);
 
       // We assume all actions are related to the subscribed token-tx-table
-      if (msg.type === 'actions') {
+      if (msg.type === "actions") {
         const tokenId = msg.data?.[0]?.asset;
         // Update token tx
         queryClient.setQueriesData(
           {
-            type: 'active',
+            type: "active",
             queryKey: ApeQueries.tokenTxs({ id: tokenId }).queryKey,
           },
           (prev?: InfiniteData<QueryData<typeof ApeQueries.tokenTxs>>) => {
@@ -171,19 +187,23 @@ export const DataStreamProvider = ({ children }: { children: React.ReactNode }) 
 
             // Overwrite previous first page
             const newPages = prev.pages.slice(1);
-            newPages.unshift({ txs: firstPageTxs, next, args: { ...firstPage.args } });
+            newPages.unshift({
+              txs: firstPageTxs,
+              next,
+              args: { ...firstPage.args },
+            });
 
             return {
               pages: newPages,
               pageParams: prev.pageParams,
             };
-          }
+          },
         );
       }
     };
 
     initws.onerror = (err) => {
-      console.error('WebSocket error:', err);
+      console.error("WebSocket error:", err);
       initws.close();
     };
 
@@ -196,7 +216,13 @@ export const DataStreamProvider = ({ children }: { children: React.ReactNode }) 
     return () => {
       initws?.close();
     };
-  }, [queryClient, setDataStreamMsg, subscribePools, subscribeRecentTokenList, subscribeTxns]);
+  }, [
+    queryClient,
+    setDataStreamMsg,
+    subscribePools,
+    subscribeRecentTokenList,
+    subscribeTxns,
+  ]);
 
   useEffect(() => {
     const cleanup = init();
@@ -225,7 +251,7 @@ export const DataStreamProvider = ({ children }: { children: React.ReactNode }) 
 export const useDataStream = () => {
   const context = useContext(DataStreamContext);
   if (!context) {
-    throw new Error('useDataStream must be used within DataStreamProvider');
+    throw new Error("useDataStream must be used within DataStreamProvider");
   }
   return context;
 };

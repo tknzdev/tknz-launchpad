@@ -1,20 +1,33 @@
-import { Getter, SetStateAction, Setter, atom, useSetAtom } from 'jotai';
-import { useEffect } from 'react';
+import { Getter, SetStateAction, Setter, atom, useSetAtom } from "jotai";
+import { useEffect } from "react";
 
 type TypeDiscriminable = { type: string };
 function isTypeDiscriminable(val: unknown): val is TypeDiscriminable {
-  return val !== null && typeof val === 'object' && 'type' in val && typeof val.type === 'string';
+  return (
+    val !== null &&
+    typeof val === "object" &&
+    "type" in val &&
+    typeof val.type === "string"
+  );
 }
 
-type Msg<V extends TypeDiscriminable = TypeDiscriminable> = V | null | undefined;
+type Msg<V extends TypeDiscriminable = TypeDiscriminable> =
+  | V
+  | null
+  | undefined;
 
-type ExtractType<Value extends Msg> = Value extends TypeDiscriminable ? Value['type'] : never;
+type ExtractType<Value extends Msg> = Value extends TypeDiscriminable
+  ? Value["type"]
+  : never;
 
-type FilteredCallback<Value extends Msg, FilterTypes extends ReadonlyArray<string>> = (
+type FilteredCallback<
+  Value extends Msg,
+  FilterTypes extends ReadonlyArray<string>,
+> = (
   get: Getter,
   set: Setter,
   newVal: Extract<Value, { type: FilterTypes[number] }>,
-  prevVal: Value
+  prevVal: Value,
 ) => void;
 
 type ListenerEntry<Value extends Msg> = {
@@ -39,7 +52,9 @@ type ListenerEntry<Value extends Msg> = {
  *
  * @see https://jotai.org/docs/recipes/atom-with-listeners
  */
-export function atomMsgWithListeners<Value extends Msg<TypeDiscriminable>>(initialValue: Value) {
+export function atomMsgWithListeners<Value extends Msg<TypeDiscriminable>>(
+  initialValue: Value,
+) {
   const baseAtom = atom(initialValue);
   const listenersAtom = atom<ListenerEntry<Value>[]>([]);
 
@@ -52,7 +67,10 @@ export function atomMsgWithListeners<Value extends Msg<TypeDiscriminable>>(initi
 
       // Validate
       if (!isTypeDiscriminable(newVal)) {
-        console.warn('atomWithMsgListeners: received a non-type-discriminable object', newVal);
+        console.warn(
+          "atomWithMsgListeners: received a non-type-discriminable object",
+          newVal,
+        );
         return;
       }
 
@@ -64,18 +82,23 @@ export function atomMsgWithListeners<Value extends Msg<TypeDiscriminable>>(initi
 
         listener.callback(get, set, newVal, prevVal);
       });
-    }
+    },
   );
 
   function useListener<FilterTypes extends ReadonlyArray<ExtractType<Value>>>(
     filterTypes: FilterTypes,
-    callback: FilteredCallback<Value, FilterTypes>
+    callback: FilteredCallback<Value, FilterTypes>,
   ): void {
     const setListeners = useSetAtom(listenersAtom);
 
     useEffect(() => {
       const listenerEntry: ListenerEntry<Value> = {
-        callback: callback as (get: Getter, set: Setter, newVal: Value, prevVal: Value) => void,
+        callback: callback as (
+          get: Getter,
+          set: Setter,
+          newVal: Value,
+          prevVal: Value,
+        ) => void,
         filterTypes,
       };
       setListeners((prev) => [...prev, listenerEntry]);

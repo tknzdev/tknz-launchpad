@@ -1,23 +1,32 @@
-import { useMemo, useState } from 'react';
-import Head from 'next/head';
-import Link from 'next/link';
-import { z } from 'zod';
-import Header from '../components/Header';
+import { useMemo, useState } from "react";
+import Head from "next/head";
+import Link from "next/link";
+import { z } from "zod";
+import Header from "../components/Header";
+import CurveConfigPanel from "../components/CurveConfigPanel";
 
-import { useForm } from '@tanstack/react-form';
-import { Button } from '@/components/ui/button';
-import { Keypair, VersionedTransaction, Connection } from '@solana/web3.js';
-import { useUnifiedWalletContext, useWallet } from '@jup-ag/wallet-adapter';
-import { Buffer } from 'buffer';
-import { toast } from 'sonner';
+import { useForm } from "@tanstack/react-form";
+import { Button } from "@/components/ui/button";
+import { Keypair, VersionedTransaction, Connection } from "@solana/web3.js";
+import { useUnifiedWalletContext, useWallet } from "@jup-ag/wallet-adapter";
+import { Buffer } from "buffer";
+import { toast } from "sonner";
 
 // Define the schema for form validation
 const poolSchema = z.object({
-  tokenName: z.string().min(3, 'Token name must be at least 3 characters'),
-  tokenSymbol: z.string().min(1, 'Token symbol is required'),
-  tokenLogo: z.instanceof(File, { message: 'Token logo is required' }),
-  website: z.string().url({ message: 'Please enter a valid URL' }).optional().or(z.literal('')),
-  twitter: z.string().url({ message: 'Please enter a valid URL' }).optional().or(z.literal('')),
+  tokenName: z.string().min(3, "Token name must be at least 3 characters"),
+  tokenSymbol: z.string().min(1, "Token symbol is required"),
+  tokenLogo: z.instanceof(File, { message: "Token logo is required" }),
+  website: z
+    .string()
+    .url({ message: "Please enter a valid URL" })
+    .optional()
+    .or(z.literal("")),
+  twitter: z
+    .string()
+    .url({ message: "Please enter a valid URL" })
+    .optional()
+    .or(z.literal("")),
 });
 
 interface CreateMeteoraTokenResponse {
@@ -56,24 +65,32 @@ export default function CreatePool() {
   const [previewData, setPreviewData] = useState<
     (CreateMeteoraTokenResponse & { payload: any }) | null
   >(null);
+  // Initial pool parameters
+  const [investmentAmount, setInvestmentAmount] = useState<number>(0);
+  const [buyAmount, setBuyAmount] = useState<number>(0);
+  // Advanced curve configuration
+  const [showCurveConfig, setShowCurveConfig] = useState<boolean>(false);
+  const [curveConfigOverrides, setCurveConfigOverrides] = useState<
+    Record<string, any>
+  >({});
 
   const form = useForm({
     defaultValues: {
-      tokenName: '',
-      tokenSymbol: '',
+      tokenName: "",
+      tokenSymbol: "",
       tokenLogo: undefined,
-      website: '',
-      twitter: '',
+      website: "",
+      twitter: "",
     } as FormValues,
     onSubmit: async ({ value }) => {
       setIsLoading(true);
       try {
         if (!signTransaction) {
-          toast.error('Wallet not connected');
+          toast.error("Wallet not connected");
           return;
         }
         if (!value.tokenLogo) {
-          toast.error('Token logo is required');
+          toast.error("Token logo is required");
           return;
         }
         const reader = new FileReader();
@@ -81,6 +98,15 @@ export default function CreatePool() {
           reader.onload = (e) => resolve(e.target?.result as string);
           reader.readAsDataURL(value.tokenLogo!);
         });
+        // Build portal parameters: initial deposit, initial swap, plus optional curve overrides
+        const portalParams: Record<string, any> = {
+          amount: investmentAmount,
+          buyAmount: buyAmount,
+          priorityFee: 0,
+        };
+        if (Object.keys(curveConfigOverrides).length > 0) {
+          portalParams.curveConfig = curveConfigOverrides;
+        }
         const payload = {
           walletAddress: address,
           token: {
@@ -92,25 +118,25 @@ export default function CreatePool() {
             imageUrl,
           },
           isLockLiquidity: false,
-          portalParams: {},
+          portalParams,
         };
         const res = await fetch(
-          'https://tknz.fun/.netlify/functions/create-token-meteora',
+          "https://tknz.fun/.netlify/functions/create-token-meteora",
           {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
-          }
+          },
         );
         if (!res.ok) {
           const err = await res.json();
-          throw new Error(err.error ?? 'Preview failed');
+          throw new Error(err.error ?? "Preview failed");
         }
         const data: CreateMeteoraTokenResponse = await res.json();
         setPreviewData({ ...data, payload });
       } catch (err: any) {
-        console.error('Error previewing pool creation:', err);
-        toast.error(err.message || 'Failed to preview pool creation');
+        console.error("Error previewing pool creation:", err);
+        toast.error(err.message || "Failed to preview pool creation");
         setIsLoading(false);
       }
     },
@@ -120,43 +146,49 @@ export default function CreatePool() {
   });
 
   // Execute previewed transactions, then call confirm and notify endpoints
-const handleConfirm = async () => {
+  const handleConfirm = async () => {
     if (!previewData) return;
     setIsLoading(true);
     try {
       // Sign and submit each VersionedTransaction
       for (const b64 of previewData.transactions) {
-        const tx = VersionedTransaction.deserialize(Buffer.from(b64, 'base64'));
+        const tx = VersionedTransaction.deserialize(Buffer.from(b64, "base64"));
         // Preserve any server-side signatures and append wallet signature
         const signedTx = await signTransaction(tx);
-        const ourSig = signedTx.signatures.find(
-          (s) => s.publicKey.equals(publicKey!)
+        const ourSig = signedTx.signatures.find((s) =>
+          s.publicKey.equals(publicKey!),
         )?.signature;
         if (ourSig) tx.addSignature(publicKey!, ourSig);
         const raw = tx.serialize();
         const sig = await connection.sendRawTransaction(raw);
-        await connection.confirmTransaction(sig, 'confirmed');
+        await connection.confirmTransaction(sig, "confirmed");
       }
       // Confirm on backend
-      const confirmUrl = 'https://tknz.fun/.netlify/functions/confirm-token-creation';
+      const confirmUrl =
+        "https://tknz.fun/.netlify/functions/confirm-token-creation";
       const confirmRes = await fetch(confirmUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...previewData.payload, ...previewData }),
       });
       const confirmJson = await confirmRes.json();
       // Notify backend
-      const notifyUrl = 'https://tknz.fun/.netlify/functions/notify-token-creation';
+      const notifyUrl =
+        "https://tknz.fun/.netlify/functions/notify-token-creation";
       await fetch(notifyUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...previewData.payload, ...previewData, createdAt: confirmJson.createdAt }),
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...previewData.payload,
+          ...previewData,
+          createdAt: confirmJson.createdAt,
+        }),
       });
-      toast.success('Pool created successfully');
+      toast.success("Pool created successfully");
       setPoolCreated(true);
     } catch (err: any) {
-      console.error('Error executing pool creation:', err);
-      toast.error(err.message || 'Failed to create pool');
+      console.error("Error executing pool creation:", err);
+      toast.error(err.message || "Failed to create pool");
     } finally {
       setIsLoading(false);
     }
@@ -178,10 +210,18 @@ const handleConfirm = async () => {
 
         {/* Page Content */}
         <main className="container mx-auto px-4 py-10">
+          <CurveConfigPanel
+            isOpen={showCurveConfig}
+            onClose={() => setShowCurveConfig(false)}
+            config={curveConfigOverrides}
+            onChange={setCurveConfigOverrides}
+          />
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10">
             <div>
               <h1 className="text-4xl font-bold mb-2">Create Pool</h1>
-              <p className="text-gray-300">Launch your token with a customizable price curve</p>
+              <p className="text-gray-300">
+                Launch your token with a customizable price curve
+              </p>
             </div>
           </div>
 
@@ -190,14 +230,22 @@ const handleConfirm = async () => {
           ) : previewData ? (
             <div className="space-y-8">
               <div className="bg-white/5 rounded-xl p-8 backdrop-blur-sm border border-white/10">
-                <h2 className="text-2xl font-bold mb-4">Preview Pool Creation</h2>
+                <h2 className="text-2xl font-bold mb-4">
+                  Preview Pool Creation
+                </h2>
                 <p>Deposit SOL: {previewData.depositSol}</p>
-                {previewData.buySol > 0 && <p>Purchase SOL: {previewData.buySol}</p>}
+                {previewData.buySol > 0 && (
+                  <p>Purchase SOL: {previewData.buySol}</p>
+                )}
                 <div className="mt-6 flex gap-4 justify-end">
                   <Button onClick={handleConfirm} disabled={isLoading}>
-                    {isLoading ? 'Submitting...' : 'Confirm & Launch Pool'}
+                    {isLoading ? "Submitting..." : "Confirm & Launch Pool"}
                   </Button>
-                  <Button variant="secondary" onClick={() => setPreviewData(null)} disabled={isLoading}>
+                  <Button
+                    variant="secondary"
+                    onClick={() => setPreviewData(null)}
+                    disabled={isLoading}
+                  >
                     Cancel
                   </Button>
                 </div>
@@ -225,7 +273,7 @@ const handleConfirm = async () => {
                         Token Name*
                       </label>
                       {form.Field({
-                        name: 'tokenName',
+                        name: "tokenName",
                         children: (field) => (
                           <input
                             id="tokenName"
@@ -250,7 +298,7 @@ const handleConfirm = async () => {
                         Token Symbol*
                       </label>
                       {form.Field({
-                        name: 'tokenSymbol',
+                        name: "tokenSymbol",
                         children: (field) => (
                           <input
                             id="tokenSymbol"
@@ -276,11 +324,13 @@ const handleConfirm = async () => {
                       Token Logo*
                     </label>
                     {form.Field({
-                      name: 'tokenLogo',
+                      name: "tokenLogo",
                       children: (field) => (
                         <div className="border-2 border-dashed border-white/20 rounded-lg p-8 text-center">
                           <span className="iconify w-6 h-6 mx-auto mb-2 text-gray-400 ph--upload-bold" />
-                          <p className="text-gray-400 text-xs mb-2">PNG, JPG or SVG (max. 2MB)</p>
+                          <p className="text-gray-400 text-xs mb-2">
+                            PNG, JPG or SVG (max. 2MB)
+                          </p>
                           <input
                             type="file"
                             id="tokenLogo"
@@ -307,7 +357,9 @@ const handleConfirm = async () => {
 
               {/* Social Links Section */}
               <div className="bg-white/5 rounded-xl p-8 backdrop-blur-sm border border-white/10">
-                <h2 className="text-2xl font-bold mb-6">Social Links (Optional)</h2>
+                <h2 className="text-2xl font-bold mb-6">
+                  Social Links (Optional)
+                </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="mb-4">
@@ -318,7 +370,7 @@ const handleConfirm = async () => {
                       Website
                     </label>
                     {form.Field({
-                      name: 'website',
+                      name: "website",
                       children: (field) => (
                         <input
                           id="website"
@@ -341,7 +393,7 @@ const handleConfirm = async () => {
                       Twitter
                     </label>
                     {form.Field({
-                      name: 'twitter',
+                      name: "twitter",
                       children: (field) => (
                         <input
                           id="twitter"
@@ -358,14 +410,70 @@ const handleConfirm = async () => {
                 </div>
               </div>
 
+              {/* Pool Parameters Section */}
+              <div className="bg-white/5 rounded-xl p-8 backdrop-blur-sm border border-white/10">
+                <h2 className="text-2xl font-bold mb-4">Pool Parameters</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label
+                      htmlFor="initialInvestment"
+                      className="block text-sm font-medium text-gray-300 mb-1"
+                    >
+                      Initial Investment (SOL)
+                    </label>
+                    <input
+                      id="initialInvestment"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={investmentAmount}
+                      onChange={(e) =>
+                        setInvestmentAmount(parseFloat(e.target.value) || 0)
+                      }
+                      className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="initialSwap"
+                      className="block text-sm font-medium text-gray-300 mb-1"
+                    >
+                      Initial Swap (SOL)
+                    </label>
+                    <input
+                      id="initialSwap"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={buyAmount}
+                      onChange={(e) =>
+                        setBuyAmount(parseFloat(e.target.value) || 0)
+                      }
+                      className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end mt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowCurveConfig(true)}
+                    className="text-indigo-400 hover:text-indigo-200 text-sm"
+                  >
+                    Advanced Curve Options
+                  </button>
+                </div>
+              </div>
+
               {form.state.errors && form.state.errors.length > 0 && (
                 <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 space-y-2">
                   {form.state.errors.map((error, index) =>
                     Object.entries(error || {}).map(([, value]) => (
                       <div key={index} className="flex items-start gap-2">
-                        <p className="text-red-200">{value.map((v) => v.message).join(', ')}</p>
+                        <p className="text-red-200">
+                          {value.map((v) => v.message).join(", ")}
+                        </p>
                       </div>
-                    ))
+                    )),
                   )}
                 </div>
               )}
@@ -394,7 +502,11 @@ const SubmitButton = ({ isSubmitting }: { isSubmitting: boolean }) => {
   }
 
   return (
-    <Button className="flex items-center gap-2" type="submit" disabled={isSubmitting}>
+    <Button
+      className="flex items-center gap-2"
+      type="submit"
+      disabled={isSubmitting}
+    >
       {isSubmitting ? (
         <>
           <span className="iconify ph--spinner w-5 h-5 animate-spin" />
@@ -419,8 +531,8 @@ const PoolCreationSuccess = () => {
         </div>
         <h2 className="text-3xl font-bold mb-4">Pool Created Successfully!</h2>
         <p className="text-gray-300 mb-8 max-w-lg mx-auto">
-          Your token pool has been created and is now live on the Virtual Curve platform. Users can
-          now buy and trade your tokens.
+          Your token pool has been created and is now live on the Virtual Curve
+          platform. Users can now buy and trade your tokens.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link

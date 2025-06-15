@@ -1,5 +1,5 @@
-import React from 'react';
-import { IconProps } from './types';
+import React from "react";
+import { IconProps } from "./types";
 
 export const DealrIcon: React.FC<IconProps> = (props) => {
   return (
@@ -321,7 +321,14 @@ export const DealrIcon: React.FC<IconProps> = (props) => {
           fill="url(#pattern18_225_36468)"
           fillOpacity="0.2"
         />
-        <rect x="36.876" y="197.029" width="10.1983" height="2.71955" rx="1.35977" fill="#05672C" />
+        <rect
+          x="36.876"
+          y="197.029"
+          width="10.1983"
+          height="2.71955"
+          rx="1.35977"
+          fill="#05672C"
+        />
         <rect
           x="36.876"
           y="197.029"

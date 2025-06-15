@@ -1,15 +1,19 @@
-import { useTokenInfo } from '@/hooks/queries';
+import { useTokenInfo } from "@/hooks/queries";
 import {
   AUDIT_MAX_SCORE,
   AUDIT_TOP_HOLDERS_THRESHOLD,
   getAuditScoreColorCn,
   isAuditTopHoldersPass,
-} from '../Explore/pool-utils';
-import React from 'react';
-import { getAuditScore } from '../Explore/pool-utils';
-import { cn } from '@/lib/utils';
-import { HoverPopover, HoverPopoverContent, HoverPopoverTrigger } from '../ui/HoverPopover';
-import { formatReadablePercentChange } from '@/lib/format/number';
+} from "../Explore/pool-utils";
+import React from "react";
+import { getAuditScore } from "../Explore/pool-utils";
+import { cn } from "@/lib/utils";
+import {
+  HoverPopover,
+  HoverPopoverContent,
+  HoverPopoverTrigger,
+} from "../ui/HoverPopover";
+import { formatReadablePercentChange } from "@/lib/format/number";
 
 type ChecklistProps = {
   className?: string;
@@ -17,7 +21,12 @@ type ChecklistProps = {
 
 export const Checklist: React.FC<ChecklistProps> = ({ className }) => {
   return (
-    <div className={cn('flex flex-col gap-2 border border-neutral-700 rounded-lg p-2', className)}>
+    <div
+      className={cn(
+        "flex flex-col gap-2 border border-neutral-700 rounded-lg p-2",
+        className,
+      )}
+    >
       <h2 className="flex items-center justify-between text-sm font-semibold">
         Checklist <ChecklistScore />
       </h2>
@@ -34,8 +43,8 @@ const ChecklistScore: React.FC = () => {
 
   const auditScore = getAuditScore(audit);
   return (
-    <div className={cn('font-normal', getAuditScoreColorCn(auditScore))}>
-      {auditScore !== undefined ? auditScore + '/' + AUDIT_MAX_SCORE : '-'}
+    <div className={cn("font-normal", getAuditScoreColorCn(auditScore))}>
+      {auditScore !== undefined ? auditScore + "/" + AUDIT_MAX_SCORE : "-"}
     </div>
   );
 };
@@ -65,13 +74,21 @@ const ChecklistAuthority: React.FC = () => {
         </HoverPopoverContent>
       </HoverPopover>
 
-      <div className={cn('inline-flex items-center text-sm')}>
-        <div className={cn(audit?.mintAuthorityDisabled ? 'text-emerald' : 'text-rose')}>
-          {audit?.mintAuthorityDisabled ? 'Disabled' : 'Enabled'}
+      <div className={cn("inline-flex items-center text-sm")}>
+        <div
+          className={cn(
+            audit?.mintAuthorityDisabled ? "text-emerald" : "text-rose",
+          )}
+        >
+          {audit?.mintAuthorityDisabled ? "Disabled" : "Enabled"}
         </div>
         <span className="px-1 text-xs text-neutral-750">&bull;</span>
-        <div className={cn(audit?.freezeAuthorityDisabled ? 'text-emerald' : 'text-rose')}>
-          {audit?.freezeAuthorityDisabled ? 'Disabled' : 'Enabled'}
+        <div
+          className={cn(
+            audit?.freezeAuthorityDisabled ? "text-emerald" : "text-rose",
+          )}
+        >
+          {audit?.freezeAuthorityDisabled ? "Disabled" : "Enabled"}
         </div>
       </div>
     </div>
@@ -99,17 +116,19 @@ const ChecklistTopHolders: React.FC = () => {
 
       <div
         className={cn(
-          'inline-flex items-center text-sm',
+          "inline-flex items-center text-sm",
           audit?.topHoldersPercentage === undefined
-            ? 'text-neutral-500'
+            ? "text-neutral-500"
             : isAuditTopHoldersPass(audit)
-              ? 'text-emerald'
-              : 'text-rose'
+              ? "text-emerald"
+              : "text-rose",
         )}
       >
         {formatReadablePercentChange(
-          audit?.topHoldersPercentage === undefined ? undefined : audit?.topHoldersPercentage / 100,
-          { hideSign: 'positive' }
+          audit?.topHoldersPercentage === undefined
+            ? undefined
+            : audit?.topHoldersPercentage / 100,
+          { hideSign: "positive" },
         )}
       </div>
     </div>
@@ -123,20 +142,22 @@ export const AuditTooltipInfo: React.FC<{
 }> = ({ approved, label, description }) => {
   return (
     <div
-      className={cn('group space-y-1 text-neutral-200', {
-        'opacity-40': !approved,
+      className={cn("group space-y-1 text-neutral-200", {
+        "opacity-40": !approved,
       })}
     >
       <div className="flex items-center gap-x-1.5">
         <div
-          className={cn('flex size-4 items-center justify-center', {
-            'text-primary': approved,
-            'text-rose': !approved,
+          className={cn("flex size-4 items-center justify-center", {
+            "text-primary": approved,
+            "text-rose": !approved,
           })}
         >
           <span className="iconify text-primary ph--check-bold" />
         </div>
-        <div className="mt-0.5 whitespace-pre text-left text-xs font-medium leading-3">{label}</div>
+        <div className="mt-0.5 whitespace-pre text-left text-xs font-medium leading-3">
+          {label}
+        </div>
       </div>
       <p className="text-xs text-neutral-400">{description}</p>
     </div>

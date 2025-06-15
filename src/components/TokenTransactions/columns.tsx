@@ -1,22 +1,22 @@
-import { ToggleGroup as ToggleGroupPrimitive } from 'radix-ui';
-import { ColumnDef } from '@tanstack/react-table';
+import { ToggleGroup as ToggleGroupPrimitive } from "radix-ui";
+import { ColumnDef } from "@tanstack/react-table";
 
-import { DateMode } from './datemode';
-import { Tx } from '../Explore/types';
-import { CurrentAge } from './CurrentAge';
-import { Badge } from './Badge';
-import { intlDate } from '@/lib/format/date';
-import { ReadableNumber } from '../ui/ReadableNumber';
-import { TruncatedAddress } from '../TruncatedAddress/TruncatedAddress';
-import { ExternalLink } from '../ui/ExternalLink';
-import { TableCell } from '../Table';
-import { TableRow } from '../Table';
-import { Skeleton } from '../ui/Skeleton';
-import ExternalIcon from '@/icons/ExternalIcon';
+import { DateMode } from "./datemode";
+import { Tx } from "../Explore/types";
+import { CurrentAge } from "./CurrentAge";
+import { Badge } from "./Badge";
+import { intlDate } from "@/lib/format/date";
+import { ReadableNumber } from "../ui/ReadableNumber";
+import { TruncatedAddress } from "../TruncatedAddress/TruncatedAddress";
+import { ExternalLink } from "../ui/ExternalLink";
+import { TableCell } from "../Table";
+import { TableRow } from "../Table";
+import { Skeleton } from "../ui/Skeleton";
+import ExternalIcon from "@/icons/ExternalIcon";
 
 export const columns: ColumnDef<Tx>[] = [
   {
-    accessorKey: 'timestamp',
+    accessorKey: "timestamp",
     header: ({ table }) => {
       return (
         <ToggleGroupPrimitive.Root
@@ -48,32 +48,38 @@ export const columns: ColumnDef<Tx>[] = [
     },
     cell: ({ row, table }) => {
       return (
-        <div className="flex items-center gap-x-1 truncate text-left font-medium" translate="no">
+        <div
+          className="flex items-center gap-x-1 truncate text-left font-medium"
+          translate="no"
+        >
           <div>
             {table.options.meta?.dateMode === DateMode.DATE ? (
-              intlDate.format(row.original.timestamp, { withoutYear: true, hour12: false })
+              intlDate.format(row.original.timestamp, {
+                withoutYear: true,
+                hour12: false,
+              })
             ) : (
               <CurrentAge date={new Date(row.original.timestamp)} />
             )}
           </div>
           <Badge
-            variant={row.original.type === 'buy' ? 'green' : 'red'}
+            variant={row.original.type === "buy" ? "green" : "red"}
             className="w-fit lg:hidden"
           >
-            {row.original.type === 'buy' ? 'B' : 'S'}
+            {row.original.type === "buy" ? "B" : "S"}
           </Badge>
         </div>
       );
     },
   },
   {
-    accessorKey: 'type',
+    accessorKey: "type",
     size: 50,
     header: () => <div className="text-center">{`Type`}</div>,
     cell: ({ row }) => {
       return (
         <Badge
-          variant={row.original.type === 'buy' ? 'green' : 'red'}
+          variant={row.original.type === "buy" ? "green" : "red"}
           className="text-right capitalize"
         >
           {row.original.type}
@@ -82,7 +88,7 @@ export const columns: ColumnDef<Tx>[] = [
     },
   },
   {
-    accessorKey: 'usdPrice',
+    accessorKey: "usdPrice",
     header: () => <div className="text-right">{`Price`}</div>,
     cell: ({ row }) => {
       return (
@@ -98,38 +104,45 @@ export const columns: ColumnDef<Tx>[] = [
     },
   },
   {
-    accessorKey: 'usdVolume',
+    accessorKey: "usdVolume",
     header: () => <div className="text-right">{`Volume`}</div>,
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue('usdVolume'));
-      const formatted = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
+      const amount = parseFloat(row.getValue("usdVolume"));
+      const formatted = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
       }).format(amount);
 
       return <div className="text-right font-medium">{formatted}</div>;
     },
   },
   {
-    accessorKey: 'amount',
-    header: ({ table }) => <div className="text-right">{table.options.meta?.symbol}</div>,
+    accessorKey: "amount",
+    header: ({ table }) => (
+      <div className="text-right">{table.options.meta?.symbol}</div>
+    ),
     cell: ({ row }) => {
       return (
         <div className="text-right">
-          <ReadableNumber format="compact" className="font-medium" num={row.original.amount} />
+          <ReadableNumber
+            format="compact"
+            className="font-medium"
+            num={row.original.amount}
+          />
         </div>
       );
     },
   },
   {
-    accessorKey: 'traderAddress',
+    accessorKey: "traderAddress",
     header: () => <div className="text-right">{`Trader`}</div>,
     cell: ({ row, table }) => {
       return (
         <div className="flex items-center justify-end gap-x-1.5 text-right text-neutral-400">
           <div className="flex items-center gap-x-1">
-            {row.original.traderAddress === table.options.meta?.walletAddress ? (
-              <Badge variant={'grey'} className="px-1">
+            {row.original.traderAddress ===
+            table.options.meta?.walletAddress ? (
+              <Badge variant={"grey"} className="px-1">
                 {`You`}
               </Badge>
             ) : null}
@@ -145,9 +158,9 @@ export const columns: ColumnDef<Tx>[] = [
     },
   },
   {
-    accessorKey: 'txHash',
+    accessorKey: "txHash",
     size: 24,
-    header: () => '',
+    header: () => "",
     cell: ({ row }) => {
       return (
         <ExternalLink

@@ -1,6 +1,6 @@
-import { useWallet } from '@jup-ag/wallet-adapter';
-import { useEffect, useState, useCallback } from 'react';
-import { Skeleton } from '../ui/Skeleton';
+import { useWallet } from "@jup-ag/wallet-adapter";
+import { useEffect, useState, useCallback } from "react";
+import { Skeleton } from "../ui/Skeleton";
 
 export function TerminalComponent({ mint }: { mint: string }) {
   const walletContext = useWallet();
@@ -9,10 +9,10 @@ export function TerminalComponent({ mint }: { mint: string }) {
 
   const launchTerminal = useCallback(async () => {
     window.Jupiter.init({
-      displayMode: 'integrated',
-      integratedTargetId: 'jupiter-terminal',
+      displayMode: "integrated",
+      integratedTargetId: "jupiter-terminal",
       formProps: {
-        initialInputMint: 'So11111111111111111111111111111111111111112',
+        initialInputMint: "So11111111111111111111111111111111111111112",
         initialOutputMint: mint,
       },
     });
@@ -40,13 +40,13 @@ export function TerminalComponent({ mint }: { mint: string }) {
   }, [isLoaded, launchTerminal]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       setTimeout(() => {
         window.Jupiter.init({
-          displayMode: 'integrated',
-          integratedTargetId: 'jupiter-terminal',
+          displayMode: "integrated",
+          integratedTargetId: "jupiter-terminal",
           formProps: {
-            initialInputMint: 'So11111111111111111111111111111111111111112',
+            initialInputMint: "So11111111111111111111111111111111111111112",
             initialOutputMint: mint,
           },
         });
@@ -55,8 +55,10 @@ export function TerminalComponent({ mint }: { mint: string }) {
   }, [mint, isLoaded, launchTerminal]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.Jupiter) {
-      window.Jupiter.syncProps({ passthroughWalletContextState: walletContext });
+    if (typeof window !== "undefined" && window.Jupiter) {
+      window.Jupiter.syncProps({
+        passthroughWalletContextState: walletContext,
+      });
     }
   }, [walletContext]);
 
@@ -67,7 +69,9 @@ export function TerminalComponent({ mint }: { mint: string }) {
           <div className="flex flex-col items-center justify-start w-full h-full gap-y-2">
             <Skeleton className="h-20 w-full" />
             <Skeleton className="h-20 w-full" />
-            <span className="text-gray-400 mt-4">Loading Jupiter Terminal...</span>
+            <span className="text-gray-400 mt-4">
+              Loading Jupiter Terminal...
+            </span>
           </div>
         </div>
       ) : (

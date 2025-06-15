@@ -1,12 +1,16 @@
 /* eslint-disable @next/next/no-img-element */
-import Image from 'next/image';
-import * as React from 'react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Image from "next/image";
+import * as React from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { TokenIconInfo, TrenchesTokenIconContext, useTrenchesTokenIconContext } from './Context';
-import { Asset } from '../Explore/types';
-import { cn, getBaseUrl } from '@/lib/utils';
-import { TrenchesTokenIconLaunchpad } from '../LaunchpadIndicator/LaunchpadIndicator';
+import {
+  TokenIconInfo,
+  TrenchesTokenIconContext,
+  useTrenchesTokenIconContext,
+} from "./Context";
+import { Asset } from "../Explore/types";
+import { cn, getBaseUrl } from "@/lib/utils";
+import { TrenchesTokenIconLaunchpad } from "../LaunchpadIndicator/LaunchpadIndicator";
 
 /**
  * Hostnames with known issues using the CDN service
@@ -24,8 +28,8 @@ type TrenchesTokenIconRootProps = React.PropsWithChildren<{
 }>;
 
 type TrenchesTokenIconImageProps = Omit<
-  React.ComponentPropsWithoutRef<'img'>,
-  'src' | 'onError' | 'alt' | 'width' | 'height'
+  React.ComponentPropsWithoutRef<"img">,
+  "src" | "onError" | "alt" | "width" | "height"
 >;
 
 export const TrenchesTokenIconRoot: React.FC<TrenchesTokenIconRootProps> = ({
@@ -41,7 +45,8 @@ export const TrenchesTokenIconRoot: React.FC<TrenchesTokenIconRootProps> = ({
   const [isValid, setIsValid] = useState(true);
   const [isCdnValid, setIsCdnValid] = useState(true);
 
-  const imageUrl = token && ((token as Asset).icon ?? (token as TokenIconInfo)?.logoURI);
+  const imageUrl =
+    token && ((token as Asset).icon ?? (token as TokenIconInfo)?.logoURI);
 
   const transformedSrc = useMemo(() => {
     if (!imageUrl) {
@@ -51,17 +56,19 @@ export const TrenchesTokenIconRoot: React.FC<TrenchesTokenIconRootProps> = ({
       // Use base to support relative site assets
       const src = new URL(imageUrl, getBaseUrl());
 
-      const matched = CDN_BLACKLIST_HOSTNAMES.some((regex) => src.hostname.match(regex));
+      const matched = CDN_BLACKLIST_HOSTNAMES.some((regex) =>
+        src.hostname.match(regex),
+      );
       if (matched) {
         return imageUrl;
       }
 
       const url = new URL(`https://wsrv.nl`);
-      url.searchParams.set('w', width.toString());
-      url.searchParams.set('h', height.toString());
-      url.searchParams.set('url', src.toString());
+      url.searchParams.set("w", width.toString());
+      url.searchParams.set("h", height.toString());
+      url.searchParams.set("url", src.toString());
       // For pixel ratio, to make image sharper
-      url.searchParams.set('dpr', '2');
+      url.searchParams.set("dpr", "2");
 
       return url.toString();
     } catch {
@@ -77,17 +84,18 @@ export const TrenchesTokenIconRoot: React.FC<TrenchesTokenIconRootProps> = ({
     return transformedSrc;
   }, [imageUrl, transformedSrc, isCdnValid]);
 
-  const handleImageError: React.ReactEventHandler<HTMLImageElement> = useCallback(
-    (e) => {
-      onError?.(e);
-      if (resolvedSrc && resolvedSrc !== imageUrl) {
-        setIsCdnValid(false);
-      } else {
-        setIsValid(false);
-      }
-    },
-    [onError, resolvedSrc, imageUrl]
-  );
+  const handleImageError: React.ReactEventHandler<HTMLImageElement> =
+    useCallback(
+      (e) => {
+        onError?.(e);
+        if (resolvedSrc && resolvedSrc !== imageUrl) {
+          setIsCdnValid(false);
+        } else {
+          setIsValid(false);
+        }
+      },
+      [onError, resolvedSrc, imageUrl],
+    );
 
   return (
     <TrenchesTokenIconContext.Provider
@@ -107,7 +115,10 @@ export const TrenchesTokenIconRoot: React.FC<TrenchesTokenIconRootProps> = ({
       }}
     >
       <div
-        className={cn('relative flex h-8 w-8 rounded-full bg-neutral-850', className)}
+        className={cn(
+          "relative flex h-8 w-8 rounded-full bg-neutral-850",
+          className,
+        )}
         style={style}
       >
         {children}
@@ -157,15 +168,15 @@ export const TrenchesTokenIconImage: React.FC<TrenchesTokenIconImageProps> = ({
         height={height}
         style={style}
         className={className}
-        url={token?.logoURI ?? ''}
-        transformedUrl={transformedSrc ?? ''}
+        url={token?.logoURI ?? ""}
+        transformedUrl={transformedSrc ?? ""}
       />
     );
   }
 
   return (
     <img
-      className={cn('h-full w-full rounded-full', className)}
+      className={cn("h-full w-full rounded-full", className)}
       ref={imgRef}
       src={resolvedSrc}
       alt={token?.symbol}
@@ -189,9 +200,9 @@ const UnknownTokenImage: React.FC<{
 }> = ({ url, transformedUrl, className, ...props }) => {
   return (
     <Image
-      className={cn('h-full w-full rounded-full', className)}
+      className={cn("h-full w-full rounded-full", className)}
       alt="unknown"
-      src={'/coins/unknown.svg'}
+      src={"/coins/unknown.svg"}
       data-url={url}
       data-transformed-url={transformedUrl}
       {...props}
@@ -199,7 +210,7 @@ const UnknownTokenImage: React.FC<{
   );
 };
 
-type DefaultTokenIconProps = React.ComponentPropsWithoutRef<'img'> & {
+type DefaultTokenIconProps = React.ComponentPropsWithoutRef<"img"> & {
   token: TokenIconInfo | Asset | undefined | null;
   width?: number;
   height?: number;
@@ -210,7 +221,9 @@ type DefaultTokenIconProps = React.ComponentPropsWithoutRef<'img'> & {
 /**
  * Display a token icon
  */
-export const TrenchesTokenIcon: React.FunctionComponent<DefaultTokenIconProps> = ({
+export const TrenchesTokenIcon: React.FunctionComponent<
+  DefaultTokenIconProps
+> = ({
   token,
   width,
   height,

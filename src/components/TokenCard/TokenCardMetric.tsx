@@ -1,11 +1,11 @@
-import React, { useMemo } from 'react';
-import { HoverPopover } from '../ui/HoverPopover';
-import { Pool } from '../Explore/types';
-import { cn } from '@/lib/utils';
-import { isAuditTopHoldersPass } from '../Explore/pool-utils';
-import { getNumberColorCn } from '../ui/ReadableNumber';
-import { ReadableNumber } from '../ui/ReadableNumber';
-import { formatReadablePercentChange } from '@/lib/format/number';
+import React, { useMemo } from "react";
+import { HoverPopover } from "../ui/HoverPopover";
+import { Pool } from "../Explore/types";
+import { cn } from "@/lib/utils";
+import { isAuditTopHoldersPass } from "../Explore/pool-utils";
+import { getNumberColorCn } from "../ui/ReadableNumber";
+import { ReadableNumber } from "../ui/ReadableNumber";
+import { formatReadablePercentChange } from "@/lib/format/number";
 
 type MetricProps = {
   label: React.ReactNode;
@@ -14,9 +14,19 @@ type MetricProps = {
   className?: string;
 };
 
-export const Metric: React.FC<MetricProps> = ({ label, children, tooltip, className }) => (
+export const Metric: React.FC<MetricProps> = ({
+  label,
+  children,
+  tooltip,
+  className,
+}) => (
   <HoverPopover content={tooltip} asChild>
-    <button className={cn('z-[1] flex items-center gap-0.5 text-neutral-500', className)}>
+    <button
+      className={cn(
+        "z-[1] flex items-center gap-0.5 text-neutral-500",
+        className,
+      )}
+    >
       {label}
       {children}
     </button>
@@ -24,31 +34,38 @@ export const Metric: React.FC<MetricProps> = ({ label, children, tooltip, classN
 );
 
 type TokenCardTopHoldersMetricProps = {
-  audit: Pool['baseAsset']['audit'];
+  audit: Pool["baseAsset"]["audit"];
 };
 
-export const TokenCardTopHoldersMetric: React.FC<TokenCardTopHoldersMetricProps> = ({ audit }) => {
+export const TokenCardTopHoldersMetric: React.FC<
+  TokenCardTopHoldersMetricProps
+> = ({ audit }) => {
   const topHoldersPercentage = audit?.topHoldersPercentage;
   const isPass = isAuditTopHoldersPass(audit);
 
   return (
-    <Metric label={<div className="mr-px text-neutral-500">T10</div>} tooltip="Top 10 Holders">
+    <Metric
+      label={<div className="mr-px text-neutral-500">T10</div>}
+      tooltip="Top 10 Holders"
+    >
       <span
         className={cn(
-          'opacity-80',
+          "opacity-80",
           topHoldersPercentage === undefined
-            ? 'text-neutral-600'
+            ? "text-neutral-600"
             : isPass
-              ? 'text-emerald'
-              : 'text-rose'
+              ? "text-emerald"
+              : "text-rose",
         )}
       >
         {formatReadablePercentChange(
-          topHoldersPercentage === undefined ? undefined : topHoldersPercentage / 100,
+          topHoldersPercentage === undefined
+            ? undefined
+            : topHoldersPercentage / 100,
           {
-            hideSign: 'positive',
+            hideSign: "positive",
             decimals: 0,
-          }
+          },
         )}
       </span>
     </Metric>
@@ -60,10 +77,9 @@ type TokenCardNetVolumeMetricProps = {
   sellVolume: number | undefined;
 };
 
-export const TokenCardNetVolumeMetric: React.FC<TokenCardNetVolumeMetricProps> = ({
-  buyVolume,
-  sellVolume,
-}) => {
+export const TokenCardNetVolumeMetric: React.FC<
+  TokenCardNetVolumeMetricProps
+> = ({ buyVolume, sellVolume }) => {
   const netVolume =
     buyVolume === undefined && sellVolume === undefined
       ? undefined
@@ -79,7 +95,7 @@ export const TokenCardNetVolumeMetric: React.FC<TokenCardNetVolumeMetricProps> =
       tooltip="Net Volume"
     >
       <ReadableNumber
-        className={cn('opacity-80', getNumberColorCn(netVolume))}
+        className={cn("opacity-80", getNumberColorCn(netVolume))}
         format="compact"
         num={netVolume ? Math.abs(netVolume) : undefined}
         prefix="$"
@@ -93,10 +109,9 @@ type TokenCardNetBuyersMetricProps = {
   numTraders: number | undefined;
 };
 
-export const TokenCardNetBuyersMetric: React.FC<TokenCardNetBuyersMetricProps> = ({
-  numNetBuyers,
-  numTraders,
-}) => {
+export const TokenCardNetBuyersMetric: React.FC<
+  TokenCardNetBuyersMetricProps
+> = ({ numNetBuyers, numTraders }) => {
   const isNetBuyersDominant =
     numNetBuyers === undefined || numTraders === undefined || numTraders === 0
       ? undefined
@@ -113,10 +128,14 @@ export const TokenCardNetBuyersMetric: React.FC<TokenCardNetBuyersMetricProps> =
     >
       <ReadableNumber
         className={cn(
-          'opacity-80',
+          "opacity-80",
           getNumberColorCn(
-            isNetBuyersDominant === undefined ? undefined : isNetBuyersDominant ? 1 : -1
-          )
+            isNetBuyersDominant === undefined
+              ? undefined
+              : isNetBuyersDominant
+                ? 1
+                : -1,
+          ),
         )}
         format="compact"
         num={numNetBuyers}
@@ -131,10 +150,20 @@ type TokenCardHoldersMetricProps = {
   holderCount: number | undefined;
 };
 
-export const TokenCardHoldersMetric: React.FC<TokenCardHoldersMetricProps> = ({ holderCount }) => {
+export const TokenCardHoldersMetric: React.FC<TokenCardHoldersMetricProps> = ({
+  holderCount,
+}) => {
   return (
-    <Metric label={<span className="iconify ic--round-people-alt">H</span>} tooltip="Holders">
-      <ReadableNumber format="compact" className="text-neutral-400" num={holderCount} integer />
+    <Metric
+      label={<span className="iconify ic--round-people-alt">H</span>}
+      tooltip="Holders"
+    >
+      <ReadableNumber
+        format="compact"
+        className="text-neutral-400"
+        num={holderCount}
+        integer
+      />
     </Metric>
   );
 };
@@ -159,7 +188,10 @@ export const TokenCardVolumeMetric: React.FC<TokenCardVolumeMetricProps> = ({
     <Metric label="V" tooltip="Volume" className="text-sm">
       <ReadableNumber
         format="compact"
-        className={cn('font-medium text-neutral-300', isAboveThreshold && 'text-yellow-200')}
+        className={cn(
+          "font-medium text-neutral-300",
+          isAboveThreshold && "text-yellow-200",
+        )}
         num={volume}
         prefix="$"
       />
@@ -172,14 +204,19 @@ type TokenCardMcapMetricProps = {
   mcap: number | undefined;
 };
 
-export const TokenCardMcapMetric: React.FC<TokenCardMcapMetricProps> = ({ mcap }) => {
+export const TokenCardMcapMetric: React.FC<TokenCardMcapMetricProps> = ({
+  mcap,
+}) => {
   const isAboveThreshold = useMemo(() => mcap && mcap >= 250_000, [mcap]);
 
   return (
     <Metric label="MC" tooltip="Market Cap" className="text-sm">
       <ReadableNumber
         format="compact"
-        className={cn('font-medium text-neutral-300', isAboveThreshold && 'text-yellow-200')}
+        className={cn(
+          "font-medium text-neutral-300",
+          isAboveThreshold && "text-yellow-200",
+        )}
         num={mcap}
         prefix="$"
       />
@@ -192,9 +229,9 @@ type TokenCardLiquidityMetricProps = {
   liquidity: number | undefined;
 };
 
-export const TokenCardLiquidityMetric: React.FC<TokenCardLiquidityMetricProps> = ({
-  liquidity,
-}) => {
+export const TokenCardLiquidityMetric: React.FC<
+  TokenCardLiquidityMetricProps
+> = ({ liquidity }) => {
   return (
     <Metric label="L" tooltip="Liquidity">
       <ReadableNumber

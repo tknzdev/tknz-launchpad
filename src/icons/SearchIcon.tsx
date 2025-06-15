@@ -1,12 +1,20 @@
-import { cn } from '@/lib/utils';
-import React from 'react';
-import { IconProps } from './types';
+import { cn } from "@/lib/utils";
+import React from "react";
+import { IconProps } from "./types";
 
-const SearchIcon: React.FC<IconProps> = ({ width = 16, height = 16, className, ...props }) => {
+const SearchIcon: React.FC<IconProps> = ({
+  width = 16,
+  height = 16,
+  className,
+  ...props
+}) => {
   return (
     <svg
       // TODO: refactor, this should really be in the consumer
-      className={cn('flex items-center fill-current text-white/[0.15]', className)}
+      className={cn(
+        "flex items-center fill-current text-white/[0.15]",
+        className,
+      )}
       width={width}
       height={height}
       viewBox="0 0 18 18"

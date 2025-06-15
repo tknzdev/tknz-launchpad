@@ -1,17 +1,17 @@
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
 
 const Spinner = ({
   className,
-  baseColor = 'currentColor',
-  spinnerColor = 'currentColor',
+  baseColor = "currentColor",
+  spinnerColor = "currentColor",
   width = 20,
   height = 20,
 }: {
   className?: string;
   baseColor?: string;
   spinnerColor?: string;
-  width?: React.CSSProperties['width'];
-  height?: React.CSSProperties['height'];
+  width?: React.CSSProperties["width"];
+  height?: React.CSSProperties["height"];
 }) => (
   <div
     className={cn(`flex items-center justify-center rounded-full`, className)}

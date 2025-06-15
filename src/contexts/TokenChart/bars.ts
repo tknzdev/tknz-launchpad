@@ -1,16 +1,19 @@
-import { Bar, ResolutionString } from '@/components/AdvancedTradingView/charting_library';
-import { Tx } from '@/components/Explore/types';
+import {
+  Bar,
+  ResolutionString,
+} from "@/components/AdvancedTradingView/charting_library";
+import { Tx } from "@/components/Explore/types";
 import {
   ChartTimeInterval,
   chartTimeIntervalToMillis,
   resolutionToChartTimeInterval,
-} from '@/components/TokenChart/intervals';
+} from "@/components/TokenChart/intervals";
 
 export function getNextBar(
   mostRecentBar: Bar | undefined,
   swaps: Tx[],
   resolution: ResolutionString,
-  baseAssetCircSupply?: number | undefined // if number, chart is showing mcap instead of price
+  baseAssetCircSupply?: number | undefined, // if number, chart is showing mcap instead of price
 ): Bar | undefined {
   if (!mostRecentBar || swaps.length === 0) {
     return mostRecentBar;
@@ -19,7 +22,7 @@ export function getNextBar(
   const newBar = constructBars(
     swaps,
     resolutionToChartTimeInterval[resolution],
-    baseAssetCircSupply
+    baseAssetCircSupply,
   )[0];
 
   if (newBar.time > mostRecentBar.time) {
@@ -50,12 +53,15 @@ export function getNextBar(
 function constructBars(
   swaps: Tx[],
   timeInterval: ChartTimeInterval,
-  baseAssetCircSupply?: number | undefined // if number, chart is showing mcap instead of price
+  baseAssetCircSupply?: number | undefined, // if number, chart is showing mcap instead of price
 ): Bar[] {
-  const startMillis: number = getTimeIntervalStart(swaps[0].timestamp, timeInterval).valueOf();
+  const startMillis: number = getTimeIntervalStart(
+    swaps[0].timestamp,
+    timeInterval,
+  ).valueOf();
   const endMillis: number = getTimeIntervalStart(
     swaps[swaps.length - 1].timestamp,
-    timeInterval
+    timeInterval,
   ).valueOf();
 
   const grouping: Record<string, Tx[]> = {};
@@ -89,7 +95,10 @@ function constructBars(
   return bars;
 }
 
-function getTimeIntervalStart(timestamp: string | Date, timeInterval: ChartTimeInterval): Date {
+function getTimeIntervalStart(
+  timestamp: string | Date,
+  timeInterval: ChartTimeInterval,
+): Date {
   const timestampMillis = new Date(timestamp).valueOf();
   const intervalMillis = chartTimeIntervalToMillis[timeInterval];
   const startMillis = timestampMillis - (timestampMillis % intervalMillis);

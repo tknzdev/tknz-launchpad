@@ -1,16 +1,16 @@
-import React from 'react';
+import React from "react";
 
-import { Pool, TokenListTimeframe } from '../Explore/types';
+import { Pool, TokenListTimeframe } from "../Explore/types";
 
-import { cn } from '@/lib/utils';
-import { Skeleton } from '../ui/Skeleton';
-import { TrenchesPoolTokenIcon } from '../TokenIcon/TokenIcon';
-import { Copyable } from '../ui/Copyable';
-import CopyIconSVG from '@/icons/CopyIconSVG';
-import { TokenAge } from '../TokenAge';
-import { TokenSocials } from '../TokenSocials';
-import { TokenCardMcapMetric, TokenCardVolumeMetric } from './TokenCardMetric';
-import Link from 'next/link';
+import { cn } from "@/lib/utils";
+import { Skeleton } from "../ui/Skeleton";
+import { TrenchesPoolTokenIcon } from "../TokenIcon/TokenIcon";
+import { Copyable } from "../ui/Copyable";
+import CopyIconSVG from "@/icons/CopyIconSVG";
+import { TokenAge } from "../TokenAge";
+import { TokenSocials } from "../TokenSocials";
+import { TokenCardMcapMetric, TokenCardVolumeMetric } from "./TokenCardMetric";
+import Link from "next/link";
 
 type TokenCardProps = {
   pool: Pool;
@@ -18,7 +18,11 @@ type TokenCardProps = {
   rowRef: (element: HTMLElement | null, poolId: string) => void;
 };
 
-export const TokenCard: React.FC<TokenCardProps> = ({ pool, timeframe, rowRef }) => {
+export const TokenCard: React.FC<TokenCardProps> = ({
+  pool,
+  timeframe,
+  rowRef,
+}) => {
   const stats = pool.baseAsset[`stats${timeframe}`];
 
   return (
@@ -52,13 +56,20 @@ export const TokenCard: React.FC<TokenCardProps> = ({ pool, timeframe, rowRef })
                 >
                   {(copied) => (
                     <>
-                      <div className="truncate text-xs" title={pool.baseAsset.name}>
+                      <div
+                        className="truncate text-xs"
+                        title={pool.baseAsset.name}
+                      >
                         {pool.baseAsset.name}
                       </div>
                       {copied ? (
                         <div className="iconify h-3 w-3 shrink-0 text-cyber-green-terminal ph--check-bold" />
                       ) : (
-                        <CopyIconSVG className="h-3 w-3 shrink-0" width={12} height={12} />
+                        <CopyIconSVG
+                          className="h-3 w-3 shrink-0"
+                          width={12}
+                          height={12}
+                        />
                       )}
                     </>
                   )}
@@ -71,13 +82,19 @@ export const TokenCard: React.FC<TokenCardProps> = ({ pool, timeframe, rowRef })
         {/* 2nd row */}
         <div className="flex w-full items-center justify-between">
           <div className="flex items-center gap-1.5">
-            <TokenAge className="opacity-80 cyber-mono text-cyber-green-neon/70" date={pool.createdAt} />
+            <TokenAge
+              className="opacity-80 cyber-mono text-cyber-green-neon/70"
+              date={pool.createdAt}
+            />
             <TokenSocials className="z-[1]" token={pool.baseAsset} />
           </div>
 
           {/* Token metric */}
           <div className="flex items-center gap-2.5">
-            <TokenCardVolumeMetric buyVolume={stats?.buyVolume} sellVolume={stats?.sellVolume} />
+            <TokenCardVolumeMetric
+              buyVolume={stats?.buyVolume}
+              sellVolume={stats?.sellVolume}
+            />
             <TokenCardMcapMetric mcap={pool.baseAsset.mcap} />
           </div>
         </div>
@@ -91,10 +108,19 @@ export const TokenCard: React.FC<TokenCardProps> = ({ pool, timeframe, rowRef })
   );
 };
 
-type TokenCardSkeletonProps = React.ComponentPropsWithoutRef<'div'>;
+type TokenCardSkeletonProps = React.ComponentPropsWithoutRef<"div">;
 
-export const TokenCardSkeleton: React.FC<TokenCardSkeletonProps> = ({ className, ...props }) => (
-  <div className={cn('border-b border-cyber-green-neon/20 py-3 pl-1.5 pr-2 text-xs', className)} {...props}>
+export const TokenCardSkeleton: React.FC<TokenCardSkeletonProps> = ({
+  className,
+  ...props
+}) => (
+  <div
+    className={cn(
+      "border-b border-cyber-green-neon/20 py-3 pl-1.5 pr-2 text-xs",
+      className,
+    )}
+    {...props}
+  >
     <div className="flex items-center">
       {/* Icon */}
       <div className="shrink-0 pl-2 pr-4">
@@ -109,7 +135,8 @@ export const TokenCardSkeleton: React.FC<TokenCardSkeletonProps> = ({ className,
           <div className="flex flex-col gap-1 overflow-hidden">
             {/* Symbol/Name/Icons */}
             <div className="flex items-center gap-1">
-              <Skeleton className="h-5 w-16 bg-cyber-green-neon/10" /> {/* Symbol */}
+              <Skeleton className="h-5 w-16 bg-cyber-green-neon/10" />{" "}
+              {/* Symbol */}
             </div>
             {/* Metrics */}
             <div className="flex items-center gap-1.5">

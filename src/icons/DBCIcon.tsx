@@ -1,5 +1,5 @@
-import React from 'react';
-import { IconProps } from './types';
+import React from "react";
+import { IconProps } from "./types";
 
 export const DBCIcon: React.FC<IconProps> = (props) => {
   return (
@@ -12,11 +12,16 @@ export const DBCIcon: React.FC<IconProps> = (props) => {
       {...props}
     >
       <rect width="300" height="300" rx="150" fill="black" />
-      <rect width="300" height="300" rx="150" fill="url(#paint0_linear_150_3142)" />
+      <rect
+        width="300"
+        height="300"
+        rx="150"
+        fill="url(#paint0_linear_150_3142)"
+      />
       <g clipPath="url(#clip0_150_3142)">
         <mask
           id="mask0_150_3142"
-          style={{ maskType: 'alpha' }}
+          style={{ maskType: "alpha" }}
           maskUnits="userSpaceOnUse"
           x="20"
           y="70"
@@ -49,7 +54,12 @@ export const DBCIcon: React.FC<IconProps> = (props) => {
           <stop offset="1" stopColor="#5F33FF" />
         </linearGradient>
         <clipPath id="clip0_150_3142">
-          <rect width="205.697" height="205.697" fill="white" transform="translate(56 47)" />
+          <rect
+            width="205.697"
+            height="205.697"
+            fill="white"
+            transform="translate(56 47)"
+          />
         </clipPath>
       </defs>
     </svg>

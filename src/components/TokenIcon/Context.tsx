@@ -1,9 +1,9 @@
-import { TokenInfo } from '@solana/spl-token-registry';
-import { createContext, useContext } from 'react';
-import { Asset } from '../Explore/types';
+import { TokenInfo } from "@solana/spl-token-registry";
+import { createContext, useContext } from "react";
+import { Asset } from "../Explore/types";
 
-export type TokenIconInfo = Pick<TokenInfo, 'logoURI' | 'symbol'> & {
-  launchpad?: Asset['launchpad'];
+export type TokenIconInfo = Pick<TokenInfo, "logoURI" | "symbol"> & {
+  launchpad?: Asset["launchpad"];
 };
 
 type TrenchesTokenIconContextValue = {
@@ -21,12 +21,15 @@ type TrenchesTokenIconContextValue = {
   setIsCdnValid: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export const TrenchesTokenIconContext = createContext<TrenchesTokenIconContextValue | null>(null);
+export const TrenchesTokenIconContext =
+  createContext<TrenchesTokenIconContextValue | null>(null);
 
 export const useTrenchesTokenIconContext = () => {
   const context = useContext(TrenchesTokenIconContext);
   if (!context) {
-    throw new Error('useTrenchesTokenIconContext must be used within a TrenchesTokenIconRoot');
+    throw new Error(
+      "useTrenchesTokenIconContext must be used within a TrenchesTokenIconRoot",
+    );
   }
   return context;
 };

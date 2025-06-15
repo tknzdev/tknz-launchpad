@@ -1,10 +1,12 @@
-export const DASH = '-';
+export const DASH = "-";
 
 const COMPACT_THRESHOLD = 1000;
 const LONG_THRESHOLD = 10;
 const SMALL_DECIMALS = 5;
 
-export function getReadablePriceFormat(price?: number | null): ReadableNumberFormat {
+export function getReadablePriceFormat(
+  price?: number | null,
+): ReadableNumberFormat {
   if (price === undefined || price === null) {
     return ReadableNumberFormat.SMALL;
   }
@@ -28,15 +30,15 @@ function getNumberSmallFormatter(decimals: number): Intl.NumberFormat {
     minimumSignificantDigits: 3,
     maximumSignificantDigits: decimals,
     maximumFractionDigits: decimals,
-    roundingMode: 'trunc',
+    roundingMode: "trunc",
   });
   intlNumberSmallFormatters[decimals] = formatter;
   return formatter;
 }
 
 const intlNumberCompact = new Intl.NumberFormat(undefined, {
-  notation: 'compact',
-  compactDisplay: 'short',
+  notation: "compact",
+  compactDisplay: "short",
   minimumSignificantDigits: 3,
   maximumSignificantDigits: 3,
 });
@@ -69,53 +71,54 @@ const intlIntegerSmall = new Intl.NumberFormat(undefined, {
 });
 
 const intlPctChange = new Intl.NumberFormat(undefined, {
-  style: 'percent',
-  signDisplay: 'exceptZero',
+  style: "percent",
+  signDisplay: "exceptZero",
   minimumFractionDigits: 0,
   maximumFractionDigits: 2,
 });
 
 const intlPctChangeOneDec = new Intl.NumberFormat(undefined, {
-  style: 'percent',
-  signDisplay: 'exceptZero',
+  style: "percent",
+  signDisplay: "exceptZero",
   minimumFractionDigits: 0,
   maximumFractionDigits: 1,
 });
 
 const intlPctChangeZeroDec = new Intl.NumberFormat(undefined, {
-  style: 'percent',
-  signDisplay: 'exceptZero',
+  style: "percent",
+  signDisplay: "exceptZero",
   minimumFractionDigits: 0,
   maximumFractionDigits: 0,
 });
 
 const intlPctChangeNoSign = new Intl.NumberFormat(undefined, {
-  style: 'percent',
-  signDisplay: 'never',
+  style: "percent",
+  signDisplay: "never",
   minimumFractionDigits: 0,
   maximumFractionDigits: 2,
 });
 
 const intlPctChangeNoSignOneDec = new Intl.NumberFormat(undefined, {
-  style: 'percent',
-  signDisplay: 'never',
+  style: "percent",
+  signDisplay: "never",
   minimumFractionDigits: 0,
   maximumFractionDigits: 1,
 });
 
 const intlPctChangeNoSignZeroDec = new Intl.NumberFormat(undefined, {
-  style: 'percent',
-  signDisplay: 'never',
+  style: "percent",
+  signDisplay: "never",
   minimumFractionDigits: 0,
   maximumFractionDigits: 0,
 });
 
 export const ReadableNumberFormat = {
-  COMPACT: 'compact',
-  LONG: 'long',
-  SMALL: 'small',
+  COMPACT: "compact",
+  LONG: "long",
+  SMALL: "small",
 } as const;
-export type ReadableNumberFormat = (typeof ReadableNumberFormat)[keyof typeof ReadableNumberFormat];
+export type ReadableNumberFormat =
+  (typeof ReadableNumberFormat)[keyof typeof ReadableNumberFormat];
 
 type FormatReadableNumberOptions = {
   prefix?: string;
@@ -138,7 +141,7 @@ type FormatReadableNumberOptions = {
 
 function getReadableNumberFormatter(
   value: number,
-  options: FormatReadableNumberOptions
+  options: FormatReadableNumberOptions,
 ): Intl.NumberFormat {
   if (
     (!options.format && value > COMPACT_THRESHOLD) ||
@@ -146,7 +149,10 @@ function getReadableNumberFormatter(
   ) {
     return options.integer ? intlIntegerCompact : intlNumberCompact;
   }
-  if ((!options.format && value > LONG_THRESHOLD) || options.format === ReadableNumberFormat.LONG) {
+  if (
+    (!options.format && value > LONG_THRESHOLD) ||
+    options.format === ReadableNumberFormat.LONG
+  ) {
     return options.integer ? intlIntegerLong : intlNumberLong;
   }
 
@@ -162,7 +168,7 @@ function getReadableNumberFormatter(
  */
 export function formatReadableNumber(
   num?: number | null,
-  options: FormatReadableNumberOptions = {}
+  options: FormatReadableNumberOptions = {},
 ): string {
   if (num === null || num === undefined || isNaN(num)) {
     return DASH;
@@ -175,14 +181,14 @@ export function formatReadableNumber(
     const zeroes = countInsignificantFractionalZeroes(abs);
     const prefix = formatted.slice(0, num < 0 ? 4 : 3);
     const suffix = formatted.slice((num < 0 ? 3 : 2) + zeroes);
-    formatted = `${prefix}${zeroes > 0 ? formatSubscript(zeroes) : ''}${suffix}`;
+    formatted = `${prefix}${zeroes > 0 ? formatSubscript(zeroes) : ""}${suffix}`;
   }
 
   // Apply prefix before negative sign
   if (options.prefix) {
-    if (num < 0 && formatted[0] === '-') {
+    if (num < 0 && formatted[0] === "-") {
       formatted = options.prefix + formatted.slice(1);
-      formatted = '-' + formatted;
+      formatted = "-" + formatted;
     } else {
       formatted = options.prefix + formatted;
     }
@@ -202,13 +208,16 @@ export function formatReadableNumber(
  */
 export function formatReadablePercentChange(
   num?: number | null,
-  options: { hideSign?: 'all' | 'positive'; decimals?: 0 | 1 | 2 } = {}
+  options: { hideSign?: "all" | "positive"; decimals?: 0 | 1 | 2 } = {},
 ): string {
   if (num === null || num === undefined || isNaN(num)) {
     return DASH;
   }
   if (num < 10) {
-    if (options.hideSign === 'all' || (options.hideSign === 'positive' && num >= 0)) {
+    if (
+      options.hideSign === "all" ||
+      (options.hideSign === "positive" && num >= 0)
+    ) {
       const formatter =
         options.decimals === 0
           ? intlPctChangeNoSignZeroDec
@@ -225,36 +234,41 @@ export function formatReadablePercentChange(
           : intlPctChange;
     return formatter.format(num);
   }
-  return (!options.hideSign && num > 0 ? '+' : '') + Math.round(num).toString() + 'x';
+  return (
+    (!options.hideSign && num > 0 ? "+" : "") + Math.round(num).toString() + "x"
+  );
 }
 
 export const DIGIT_SUBSCRIPT: Record<string, string> = {
-  '0': '₀',
-  '1': '₁',
-  '2': '₂',
-  '3': '₃',
-  '4': '₄',
-  '5': '₅',
-  '6': '₆',
-  '7': '₇',
-  '8': '₈',
-  '9': '₉',
+  "0": "₀",
+  "1": "₁",
+  "2": "₂",
+  "3": "₃",
+  "4": "₄",
+  "5": "₅",
+  "6": "₆",
+  "7": "₇",
+  "8": "₈",
+  "9": "₉",
 };
 
 export const SUBSCRIPT_DIGIT: Record<string, string> = {
-  '₀': '0',
-  '₁': '1',
-  '₂': '2',
-  '₃': '3',
-  '₄': '4',
-  '₅': '5',
-  '₆': '6',
-  '₇': '7',
-  '₈': '8',
-  '₉': '9',
+  "₀": "0",
+  "₁": "1",
+  "₂": "2",
+  "₃": "3",
+  "₄": "4",
+  "₅": "5",
+  "₆": "6",
+  "₇": "7",
+  "₈": "8",
+  "₉": "9",
 };
 
-export const DIGIT_SUBSCRIPT_RE = new RegExp(`(${Object.values(DIGIT_SUBSCRIPT).join('|')})+`, 'g');
+export const DIGIT_SUBSCRIPT_RE = new RegExp(
+  `(${Object.values(DIGIT_SUBSCRIPT).join("|")})+`,
+  "g",
+);
 
 /**
  * Convert number to its subscript form
@@ -264,9 +278,9 @@ export const DIGIT_SUBSCRIPT_RE = new RegExp(`(${Object.values(DIGIT_SUBSCRIPT).
 function formatSubscript(num: number): string {
   return num
     .toString()
-    .split('')
+    .split("")
     .map((digit) => DIGIT_SUBSCRIPT[digit])
-    .join('');
+    .join("");
 }
 
 /**
@@ -276,7 +290,7 @@ function formatSubscript(num: number): string {
  */
 export function parseSubscript(num: string): number {
   const parsed = num.replace(DIGIT_SUBSCRIPT_RE, (match) => {
-    let digits = '';
+    let digits = "";
     for (let i = 0; i < match.length; i++) {
       digits += SUBSCRIPT_DIGIT[match[i]];
     }

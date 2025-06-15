@@ -1,12 +1,12 @@
-import * as React from 'react';
-import { formatPoolAsTokenInfo } from '../Explore/pool-utils';
-import { Pool } from '@/contexts/types';
-import { TrenchesTokenIconImage, TrenchesTokenIconRoot } from '.';
-import { TrenchesTokenIconLaunchpad } from '../LaunchpadIndicator/LaunchpadIndicator';
+import * as React from "react";
+import { formatPoolAsTokenInfo } from "../Explore/pool-utils";
+import { Pool } from "@/contexts/types";
+import { TrenchesTokenIconImage, TrenchesTokenIconRoot } from ".";
+import { TrenchesTokenIconLaunchpad } from "../LaunchpadIndicator/LaunchpadIndicator";
 
 type TrenchesPoolTokenIconProps = Omit<
   React.ComponentProps<typeof TrenchesTokenIconRoot>,
-  'token'
+  "token"
 > & {
   pool: Pool;
   /** Gap between the icon and the progress stroke in pixels */
@@ -36,7 +36,8 @@ export const TrenchesPoolTokenIcon: React.FC<TrenchesPoolTokenIconProps> = ({
   const circumference = radius * CIRCLE_CIRCUMFERENCE_FACTOR;
 
   // Graduated pools have no bonding curve value
-  const bondingCurve = pool.bondingCurve ?? (pool.baseAsset.graduatedPool ? 100 : 0);
+  const bondingCurve =
+    pool.bondingCurve ?? (pool.baseAsset.graduatedPool ? 100 : 0);
 
   const progress = bondingCurve / 100;
   const clampedProgress = Math.max(0, Math.min(1, progress));
