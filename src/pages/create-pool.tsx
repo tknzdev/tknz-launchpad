@@ -757,44 +757,6 @@ const handleConfirm = async () => {
               <div className="bg-white/5 rounded-xl p-8 backdrop-blur-sm border border-white/10">
                 <h2 className="text-2xl font-bold mb-4">Pool Parameters</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label
-                      htmlFor="initialInvestment"
-                      className="block text-sm font-medium text-gray-300 mb-1"
-                    >
-                      Initial Investment (SOL)
-                    </label>
-                    <input
-                      id="initialInvestment"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={investmentAmount}
-                      onChange={(e) =>
-                        setInvestmentAmount(parseFloat(e.target.value) || 0)
-                      }
-                      className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="initialSwap"
-                      className="block text-sm font-medium text-gray-300 mb-1"
-                    >
-                      Initial Swap (SOL)
-                    </label>
-                    <input
-                      id="initialSwap"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={buyAmount}
-                      onChange={(e) =>
-                        setBuyAmount(parseFloat(e.target.value) || 0)
-                      }
-                      className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white"
-                    />
-                  </div>
                 </div>
                 <div className="flex justify-end mt-4">
                   <button
