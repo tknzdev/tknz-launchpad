@@ -121,19 +121,16 @@ export default function CreatePool() {
           reader.onload = (e) => resolve(e.target?.result as string);
           reader.readAsDataURL(value.tokenLogo!);
         });
-        if (typeof window !== 'undefined' && window.tknz?.initTokenCreate) {
-          window.tknz.initTokenCreate({
-            name: value.tokenName,
-            ticker: value.tokenSymbol,
-            description: value.tokenName,
-            imageUrl,
-            websiteUrl: value.website || undefined,
-            twitter: value.twitter || undefined,
-            telegram: undefined,
-            investmentAmount,
-          });
-          return;
-        }
+        /*
+         * Previously, when running inside the browser extension’s content
+         * script, we delegated token creation to the injected SDK via
+         * `window.tknz.initTokenCreate(...)`.  On the standalone Launchpad site
+         * this leads to an unintended early hand-off to the extension which
+         * prevents us from showing the on-site preview.  The backend preview
+         * flow (calling the Netlify function and rendering the confirmation
+         * step) is the desired behaviour for Launchpad, so we no longer short
+         *-circuit to the SDK here.
+         */
         // Build portal parameters: initial deposit, initial swap, plus optional curve overrides
         const portalParams: Record<string, any> = {
           amount: investmentAmount,
@@ -836,14 +833,14 @@ const handleConfirm = async () => {
 }
 
 const SubmitButton = ({ isSubmitting }: { isSubmitting: boolean }) => {
-  const { publicKey, connect } = useWallet();
-  const { setShowModal } = useUnifiedWalletContext();
+  const { publicKey } = useWallet();
+  const unifiedLogic = useUnifiedWallet();
   console.log('SubmitButton render: publicKey=', publicKey);
   console.log('SubmitButton render: window.tknz=', typeof window !== 'undefined' && !!window.tknz);
 
   if (!publicKey) {
     const onClick = () => {
-      unifiedLogic.select('Tknz Extension');
+      unifiedLogic.select('Tknz Extension' as any);
       unifiedLogic.connect().catch((err) => console.error('unified connect error:', err));
     };
     return (
