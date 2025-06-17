@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { useWallet } from "@jup-ag/wallet-adapter";
+import { Buffer } from "buffer";
 import {
   Connection,
   Keypair,
@@ -55,20 +56,43 @@ export function useSendTransaction() {
         );
       }
 
-      // Sign and send transaction
-      const signedTransaction = await signTransaction(transaction);
-      if (options.additionalSigners) {
-        options.additionalSigners.forEach((signer) => {
-          transaction.sign(signer);
+      let txSignature: string | null = null;
+      if (typeof window !== 'undefined' && window.tknz?.signTransaction) {
+        // Serialize transaction to base64
+        const raw = transaction.serialize({ requireAllSignatures: false });
+        const txBase64 = Buffer.from(raw).toString('base64');
+        // Request extension to sign
+        window.tknz.signTransaction(txBase64);
+        // Await response
+        const signedBase64: string = await new Promise((resolve, reject) => {
+          const handler = (event: MessageEvent) => {
+            if (event.data?.source === 'tknz' && event.data.type === 'SIGN_TRANSACTION_RESPONSE') {
+              window.removeEventListener('message', handler);
+              if (event.data.signedTransaction) {
+                resolve(event.data.signedTransaction as string);
+              } else {
+                reject(new Error('No signed transaction from extension'));
+              }
+            }
+          };
+          window.addEventListener('message', handler);
         });
+        // Deserialize signed transaction and send
+        const signedRaw = Buffer.from(signedBase64, 'base64');
+        txSignature = await sendAndConfirmRawTransaction(connection, signedRaw, { commitment: 'confirmed' });
+      } else {
+        const signedTransaction = await signTransaction(transaction);
+        if (options.additionalSigners) {
+          options.additionalSigners.forEach((signer) => {
+            transaction.sign(signer);
+          });
+        }
+        txSignature = await sendAndConfirmRawTransaction(
+          connection,
+          signedTransaction.serialize(),
+          { commitment: 'confirmed' },
+        );
       }
-
-      const txSignature = await sendAndConfirmRawTransaction(
-        connection,
-        signedTransaction.serialize(),
-        { commitment: "confirmed" },
-      );
-
       setSignature(txSignature);
       options.onSuccess?.(txSignature);
       return txSignature;

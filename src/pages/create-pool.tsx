@@ -8,7 +8,7 @@ import CurveConfigPanel from "../components/CurveConfigPanel";
 import { useForm } from "@tanstack/react-form";
 import { Button } from "@/components/ui/button";
 import { Keypair, VersionedTransaction, Connection } from "@solana/web3.js";
-import { useUnifiedWalletContext, useWallet } from "@jup-ag/wallet-adapter";
+import { useUnifiedWalletContext, useUnifiedWallet, useWallet } from "@jup-ag/wallet-adapter";
 import { Buffer } from "buffer";
 import { toast } from "sonner";
 
@@ -69,6 +69,11 @@ interface FormValues {
 
 export default function CreatePool() {
   const { publicKey, signTransaction, signMessage } = useWallet();
+  const unifiedUI = useUnifiedWalletContext();
+  const unifiedLogic = useUnifiedWallet();
+  console.log('CreatePool: unified wallet context:', unifiedUI);
+  console.log('CreatePool: publicKey from useWallet', publicKey);
+  console.log('CreatePool: window.tknz available?', typeof window !== 'undefined' && !!window.tknz);
   const address = useMemo(() => publicKey?.toBase58(), [publicKey]);
   // Create connection with appropriate commitment
   const { setShowModal } = useUnifiedWalletContext();
@@ -116,6 +121,19 @@ export default function CreatePool() {
           reader.onload = (e) => resolve(e.target?.result as string);
           reader.readAsDataURL(value.tokenLogo!);
         });
+        if (typeof window !== 'undefined' && window.tknz?.initTokenCreate) {
+          window.tknz.initTokenCreate({
+            name: value.tokenName,
+            ticker: value.tokenSymbol,
+            description: value.tokenName,
+            imageUrl,
+            websiteUrl: value.website || undefined,
+            twitter: value.twitter || undefined,
+            telegram: undefined,
+            investmentAmount,
+          });
+          return;
+        }
         // Build portal parameters: initial deposit, initial swap, plus optional curve overrides
         const portalParams: Record<string, any> = {
           amount: investmentAmount,
@@ -818,12 +836,18 @@ const handleConfirm = async () => {
 }
 
 const SubmitButton = ({ isSubmitting }: { isSubmitting: boolean }) => {
-  const { publicKey } = useWallet();
+  const { publicKey, connect } = useWallet();
   const { setShowModal } = useUnifiedWalletContext();
+  console.log('SubmitButton render: publicKey=', publicKey);
+  console.log('SubmitButton render: window.tknz=', typeof window !== 'undefined' && !!window.tknz);
 
   if (!publicKey) {
+    const onClick = () => {
+      unifiedLogic.select('Tknz Extension');
+      unifiedLogic.connect().catch((err) => console.error('unified connect error:', err));
+    };
     return (
-      <Button type="button" onClick={() => setShowModal(true)}>
+      <Button type="button" onClick={onClick}>
         <span>Connect Wallet</span>
       </Button>
     );
