@@ -1,0 +1,22 @@
+# Plugin will output Next.js functions into the default .netlify/functions directory
+[build]
+  command = "yarn build"
+  publish = ".next"
+  functions = ".netlify/functions"
+
+[build.environment]
+  NEXT_USE_NETLIFY_EDGE = "true"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Runtime configuration for Next.js
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    cache-control = "public, max-age=31536000, immutable"
+
+[[redirects]]
+  from   = "/_next/static/*"
+  to     = "/static/:splat"
+  status = 200
