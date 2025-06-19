@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { z } from "zod";
@@ -67,6 +67,17 @@ interface FormValues {
   twitter?: string;
 }
 
+/**
+ * Shape returned by the /pool-configs function.
+ */
+interface PoolConfig {
+  pubkey: string;
+  label?: string;
+  description?: string;
+  // Catch-all for any extra fields the backend might add in the future
+  [key: string]: any;
+}
+
 export default function CreatePool() {
   const { publicKey, signTransaction, signMessage } = useWallet();
   const unifiedUI = useUnifiedWalletContext();
@@ -96,6 +107,37 @@ export default function CreatePool() {
   const [curveConfigOverrides, setCurveConfigOverrides] = useState<
     Record<string, any>
   >({});
+
+  /**
+   * Pool configuration options fetched from the backend.  The selected option's
+   * pubkey is sent when creating the pool.
+   */
+  const [poolConfigs, setPoolConfigs] = useState<PoolConfig[]>([]);
+  const [selectedConfigPubkey, setSelectedConfigPubkey] = useState<string | null>(null);
+
+  // Fetch available pool configs once on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const url =
+          process.env.NEXT_PUBLIC_POOL_CONFIGS_URL ||
+          'https://tknz.fun/.netlify/functions/pool-configs';
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`Failed to load pool configs: ${res.status}`);
+        const json = await res.json();
+        if (json?.configs && Array.isArray(json.configs)) {
+          setPoolConfigs(json.configs as PoolConfig[]);
+          // Pre-select first config if nothing chosen yet
+          if (!selectedConfigPubkey && json.configs.length > 0) {
+            setSelectedConfigPubkey(json.configs[0].pubkey);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching pool configs', err);
+        toast.error('Failed to load pool configurations');
+      }
+    })();
+  }, []);
 
   const form = useForm({
     defaultValues: {
@@ -197,7 +239,7 @@ const handleConfirm = async () => {
   }
   
   // Validate that we have the required data
-  if (!previewData.transactions || previewData.transactions.length < 2) {
+  if (!previewData.transactions || !previewData.transactions.length) {
     toast.error("Invalid transaction data received");
     return;
   }
@@ -335,7 +377,7 @@ const handleConfirm = async () => {
             <div>
               <p className="font-semibold">📋 Simulation Failed - But Transaction May Work!</p>
               <p className="text-sm mt-2">If using Phantom wallet:</p>
-              <p className="text-sm">→ Look for "Submit anyway" button in the wallet popup</p>
+              <p className="text-sm">→ Look for Submit anyway button in the wallet popup</p>
               <p className="text-sm">→ Click it to proceed with the transaction</p>
               <p className="text-sm mt-2">The simulation can fail even when the actual transaction succeeds.</p>
             </div>,
@@ -696,6 +738,47 @@ const handleConfirm = async () => {
                     })}
                   </div>
                 </div>
+              </div>
+
+              {/* Pool Configuration Section */}
+              <div className="bg-white/5 rounded-xl p-8 backdrop-blur-sm border border-white/10">
+                <h2 className="text-2xl font-bold mb-4">Pool Configuration</h2>
+
+                {poolConfigs.length === 0 ? (
+                  <p className="text-gray-400">Loading available configurations…</p>
+                ) : (
+                  <div className="space-y-4">
+                    {poolConfigs.map((cfg) => (
+                      <label
+                        key={cfg.pubkey}
+                        className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                          selectedConfigPubkey === cfg.pubkey
+                            ? 'border-cyan-500 bg-cyan-500/10'
+                            : 'border-white/10 hover:border-white/20'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          className="mt-1 accent-cyan-500"
+                          value={cfg.pubkey}
+                          checked={selectedConfigPubkey === cfg.pubkey}
+                          onChange={() => setSelectedConfigPubkey(cfg.pubkey)}
+                        />
+                        <div>
+                          <p className="font-semibold text-white">{cfg.label || cfg.pubkey}</p>
+                          {cfg.description && (
+                            <p className="text-sm text-gray-300 whitespace-pre-line">
+                              {cfg.description}
+                            </p>
+                          )}
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                )}
+                {selectedConfigPubkey === null && poolConfigs.length > 0 && (
+                  <p className="text-red-400 text-sm mt-2">Please select a configuration</p>
+                )}
               </div>
 
               {/* Social Links Section */}
