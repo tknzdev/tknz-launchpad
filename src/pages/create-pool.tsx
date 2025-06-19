@@ -7,7 +7,7 @@ import CurveConfigPanel from "../components/CurveConfigPanel";
 
 import { useForm } from "@tanstack/react-form";
 import { Button } from "@/components/ui/button";
-import { Keypair, VersionedTransaction, Connection } from "@solana/web3.js";
+import { VersionedTransaction, Connection } from "@solana/web3.js";
 import { useUnifiedWalletContext, useUnifiedWallet, useWallet } from "@jup-ag/wallet-adapter";
 import { Buffer } from "buffer";
 import { toast } from "sonner";
@@ -29,17 +29,6 @@ const poolSchema = z.object({
     .or(z.literal("")),
 });
 
-/**
- * Utility to log signature slots by matching message staticAccountKeys
- * This helps debug signature issues
- */
-function logSignatureSlots(tx: VersionedTransaction, label: string) {
-  const reqSigs = tx.message.header.numRequiredSignatures;
-  const signerKeys = tx.message.staticAccountKeys.slice(0, reqSigs).map(k => k.toBase58());
-  const slots = tx.signatures.map(sig => !sig.every(b => b === 0));
-  console.log(label, signerKeys.map((pk, i) => ({ pubkey: pk, present: slots[i] })));
-}
-
 interface CreateMeteoraTokenResponse {
   transactions: string[];
   mint: string;
@@ -57,6 +46,7 @@ interface CreateMeteoraTokenResponse {
   isLockLiquidity: boolean;
   buySol: number;
   buyLamports: number;
+  tokenMetadata: any;
 }
 
 interface FormValues {
@@ -81,13 +71,12 @@ interface PoolConfig {
 export default function CreatePool() {
   const { publicKey, signTransaction, signMessage } = useWallet();
   const unifiedUI = useUnifiedWalletContext();
-  const unifiedLogic = useUnifiedWallet();
+  
   console.log('CreatePool: unified wallet context:', unifiedUI);
   console.log('CreatePool: publicKey from useWallet', publicKey);
   console.log('CreatePool: window.tknz available?', typeof window !== 'undefined' && !!window.tknz);
-  const address = useMemo(() => publicKey?.toBase58(), [publicKey]);
-  // Create connection with appropriate commitment
-  const { setShowModal } = useUnifiedWalletContext();
+
+
   const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL || process.env.RPC_URL || 'https://api.mainnet-beta.solana.com';
   const connection = useMemo(() => new Connection(rpcUrl, {
     commitment: 'confirmed',
@@ -99,9 +88,18 @@ export default function CreatePool() {
   const [previewData, setPreviewData] = useState<
     (CreateMeteoraTokenResponse & { payload: any }) | null
   >(null);
-  // Initial pool parameters
-  const [investmentAmount, setInvestmentAmount] = useState<number>(0);
-  const [buyAmount, setBuyAmount] = useState<number>(0);
+
+  /**
+   * For the new pre-config flow we only need the partially-signed transaction
+   * (plus a couple of extra fields) returned by the create-pool Netlify
+   * function.  Once present we show a confirmation step that will sign and
+   * broadcast it.
+   */
+  const [poolCreateTx, setPoolCreateTx] = useState<
+    | { transactions: string[]; mint: string; poolConfigKey: string; feeSol: number; feeLamports: number; name: string; symbol: string; uri: string }
+    | null
+  >(null);
+  
   // Advanced curve configuration
   const [showCurveConfig, setShowCurveConfig] = useState<boolean>(false);
   const [curveConfigOverrides, setCurveConfigOverrides] = useState<
@@ -150,65 +148,74 @@ export default function CreatePool() {
     onSubmit: async ({ value }) => {
       setIsLoading(true);
       try {
-        if (!signTransaction) {
-          toast.error("Wallet not connected");
+        if (!publicKey) {
+          toast.error('Wallet not connected');
           return;
         }
+        if (!selectedConfigPubkey) {
+          toast.error('Please select a pool configuration');
+          return;
+        }
+
         if (!value.tokenLogo) {
-          toast.error("Token logo is required");
+          toast.error('Token logo is required');
           return;
         }
+
+        // Convert uploaded logo to data URL (acts as metadata URI placeholder)
         const reader = new FileReader();
         const imageUrl = await new Promise<string>((resolve) => {
           reader.onload = (e) => resolve(e.target?.result as string);
           reader.readAsDataURL(value.tokenLogo!);
         });
-        /*
-         * Previously, when running inside the browser extension’s content
-         * script, we delegated token creation to the injected SDK via
-         * `window.tknz.initTokenCreate(...)`.  On the standalone Launchpad site
-         * this leads to an unintended early hand-off to the extension which
-         * prevents us from showing the on-site preview.  The backend preview
-         * flow (calling the Netlify function and rendering the confirmation
-         * step) is the desired behaviour for Launchpad, so we no longer short
-         *-circuit to the SDK here.
-         */
-        // Build portal parameters: initial deposit, initial swap, plus optional curve overrides
-        const portalParams: Record<string, any> = {
-          amount: investmentAmount,
-          buyAmount: buyAmount,
-          priorityFee: 0,
-        };
-        if (Object.keys(curveConfigOverrides).length > 0) {
-          portalParams.curveConfig = curveConfigOverrides;
-        }
+
         const payload = {
-          walletAddress: address,
+          walletAddress: publicKey.toBase58(),
+          configKey: selectedConfigPubkey,
           token: {
             name: value.tokenName,
             ticker: value.tokenSymbol,
             description: value.tokenName,
+            imageUrl,
             websiteUrl: value.website || undefined,
             twitter: value.twitter || undefined,
-            imageUrl,
           },
-          isLockLiquidity: false,
-          portalParams,
         };
-        const res = await fetch(CREATE_API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+
+        const url =
+          process.env.NEXT_PUBLIC_CREATE_POOL_URL ||
+          'https://tknz.fun/.netlify/functions/create-pool';
+
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
+
         if (!res.ok) {
-          const err = await res.json();
-          throw new Error(err.error ?? "Preview failed");
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || `Server error (${res.status})`);
         }
-        const data: CreateMeteoraTokenResponse = await res.json();
-        setPreviewData({ ...data, payload });
+
+        const json = await res.json();
+
+        if (!json?.transactions || !json?.transactions.length) throw new Error('Invalid response from server');
+
+        setPoolCreateTx({
+          transactions: json.transactions,
+          mint: json.mint,
+          poolConfigKey: json.poolConfigKey,
+          feeSol: json.feeSol,
+          feeLamports: json.feeLamports,
+          name: value.tokenName,
+          pool: json.pool,
+          symbol: value.tokenSymbol,
+          uri: json.metadataUri || '',
+          token: json.tokenMetadata,
+        });
       } catch (err: any) {
-        console.error("Error previewing pool creation:", err);
-        toast.error(err.message || "Failed to preview pool creation");
+        console.error('Error preparing pool creation', err);
+        toast.error(err.message || 'Failed to prepare pool creation');
       } finally {
         setIsLoading(false);
       }
@@ -223,12 +230,15 @@ const CREATE_API_URL = process.env.NEXT_PUBLIC_CREATE_TOKEN_URL || '/.netlify/fu
 const SIGN_TXS_URL = process.env.NEXT_PUBLIC_SIGN_TXS_URL || '/.netlify/functions/sign-token-txs';
 const CONFIRM_API_URL = process.env.NEXT_PUBLIC_CONFIRM_TOKEN_URL || '/.netlify/functions/confirm-token-creation';
 const NOTIFY_API_URL = process.env.NEXT_PUBLIC_NOTIFY_TOKEN_URL || '/.netlify/functions/notify-token-creation';
-// Allow skipping confirmation wait for testing/debugging
-const SKIP_CONFIRMATION_WAIT = false;
+
 
 // Execute previewed transactions, then call confirm and notify endpoints
 const handleConfirm = async () => {
-  if (!previewData) return;
+  if (!poolCreateTx) {
+    toast.error("No preview data found");
+    return;
+  }
+  
   if (!publicKey) {
     toast.error("Wallet not connected");
     return;
@@ -239,7 +249,7 @@ const handleConfirm = async () => {
   }
   
   // Validate that we have the required data
-  if (!previewData.transactions || !previewData.transactions.length) {
+  if (!poolCreateTx.transactions || !poolCreateTx.transactions.length) {
     toast.error("Invalid transaction data received");
     return;
   }
@@ -248,7 +258,7 @@ const handleConfirm = async () => {
   try {
     // 1) Client-side signing of the raw transactions
     // Deserialize all transactions first
-    const txs = previewData.transactions.map((b64, idx) => {
+    let txs = poolCreateTx.transactions.map((b64, idx) => {
       try {
         const buf = Buffer.from(b64, "base64");
         const tx = VersionedTransaction.deserialize(buf);
@@ -291,16 +301,18 @@ const handleConfirm = async () => {
           })),
         },
         base64: {
-          original: previewData.transactions[idx],
+          original: poolCreateTx.transactions[idx],
         },
       })),
-      requestPayload: previewData.payload,
+      requestPayload: poolCreateTx.payload,
       responseData: {
-        mint: previewData.mint,
-        pool: previewData.pool,
-        poolConfigKey: previewData.poolConfigKey,
-        ata: previewData.ata,
-        metadataUri: previewData.metadataUri,
+        mint: poolCreateTx.mint,
+        poolConfigKey: poolCreateTx.poolConfigKey,
+        feeSol: poolCreateTx.feeSol,
+        feeLamports: poolCreateTx.feeLamports,
+        name: poolCreateTx.name,
+        symbol: poolCreateTx.symbol,
+        uri: poolCreateTx.uri,
       },
       walletInfo: {
         publicKey: publicKey.toBase58(),
@@ -393,6 +405,7 @@ const handleConfirm = async () => {
       }
     }
 
+    /** 
     // Convert signed transactions to base64 strings and log diagnostics
     const signedB64s = signedTxs.map((tx, idx) => {
       logSignatureSlots(tx, `Client-signed tx ${idx}`);
@@ -404,19 +417,16 @@ const handleConfirm = async () => {
       transactionAnalysis.transactions[idx].base64.afterClientSign = Buffer.from(tx.serialize()).toString("base64");
       return Buffer.from(tx.serialize()).toString("base64");
     });
+    **/
 
     // 2) Server-side counter-signing: config & mint via sign-token-txs endpoint
     // Check if we have poolConfigKey (might be missing in some responses)
-    if (!previewData.poolConfigKey) {
-      console.warn('poolConfigKey not found in preview data, using empty string');
+    if (!poolCreateTx.poolConfigKey) {
+      console.warn('poolConfigKey not found in poolCreateTx');
     }
     
-    console.log('POST to sign-token-txs:', SIGN_TXS_URL, {
-      walletAddress: publicKey.toBase58(), 
-      poolConfigKey: previewData.poolConfigKey || '', 
-      mint: previewData.mint
-    });
-    
+    /** going to skip out on this for now since we technically don't need it while using tknz extension **/
+    /*
     const signRes = await fetch(SIGN_TXS_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -435,6 +445,7 @@ const handleConfirm = async () => {
     const { signedConfigTx, signedPoolTx } = await signRes.json();
     console.log('Received server-signed transactions');
     
+
     // Log diagnostics for server-signed transactions
     [signedConfigTx, signedPoolTx].forEach((b64, idx) => {
       const tx = VersionedTransaction.deserialize(Buffer.from(b64, 'base64'));
@@ -446,7 +457,7 @@ const handleConfirm = async () => {
       }));
       transactionAnalysis.transactions[idx].base64.afterServerSign = b64;
     });
-
+     */
     // Log complete transaction analysis for comparison with test harness
     console.log('=== TRANSACTION ANALYSIS FOR DEBUGGING ===');
     console.log(JSON.stringify(transactionAnalysis, null, 2));
@@ -456,20 +467,28 @@ const handleConfirm = async () => {
     console.log('1. Run: npm run test:create-token');
     console.log('2. Check: tknz-site/logs/create-token-debug.json');
     console.log('3. Compare the transactionAnalysis sections');
+
+    let fullySignedTxs = poolCreateTx.transactions.map((b64, idx) => {
+      try {
+        const buf = Buffer.from(b64, "base64");
+        return VersionedTransaction.deserialize(buf);
+      } catch (err) {
+        console.error(`Failed to deserialize transaction ${idx}:`, err);
+        throw new Error(`Invalid transaction format at index ${idx}`);
+      }
+    });
     
-    // 3) Broadcast fully-signed transactions
-    const fullySignedTxs = [signedConfigTx, signedPoolTx];
     const submittedSigs: string[] = [];
     
     for (let i = 0; i < fullySignedTxs.length; i++) {
-      const raw = Buffer.from(fullySignedTxs[i], "base64");
+      const raw = fullySignedTxs[i]
       console.log(`Preparing to send fully-signed tx ${i}...`);
-      const tx = VersionedTransaction.deserialize(raw);
+      
       
       let sig;
       try {
         console.log(`Calling sendRawTransaction for tx ${i}...`);
-        sig = await connection.sendRawTransaction(raw, { 
+        sig = await connection.sendRawTransaction(raw.serialize(), { 
           skipPreflight: true,
           maxRetries: 3,
         });
@@ -480,52 +499,47 @@ const handleConfirm = async () => {
         throw err;
       }
       
-      // Optionally skip confirmation for debugging
-      if (SKIP_CONFIRMATION_WAIT) {
-        console.log(`Skipping confirmation wait for tx ${i} (SKIP_CONFIRMATION_WAIT=true)`);
-      } else {
-        // Use getLatestBlockhash for more reliable confirmation
-        console.log(`Starting confirmation process for tx ${i}...`);
+      // Use getLatestBlockhash for more reliable confirmation
+      console.log(`Starting confirmation process for tx ${i}...`);
+      try {
+        const latestBlockhash = await connection.getLatestBlockhash('confirmed');
+        console.log(`Got latest blockhash for tx ${i}:`, latestBlockhash.blockhash);
+        
+        console.log(`Calling confirmTransaction for tx ${i}...`);
+        const confirmation = await connection.confirmTransaction({
+          signature: sig,
+          blockhash: latestBlockhash.blockhash,
+          lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+        }, 'confirmed');
+        
+        console.log(`Confirmation result for tx ${i}:`, confirmation);
+        
+        if (confirmation.value.err) {
+          console.error(`Final tx ${i} on-chain error:`, confirmation.value.err);
+          throw new Error(`Transaction ${i} failed on-chain: ${JSON.stringify(confirmation.value.err)}`);
+        }
+        
+        console.log(`Final tx ${i} confirmed on-chain.`);
+      } catch (err: any) {
+        // If confirmation times out, check if the transaction actually succeeded
+        console.warn(`Confirmation error for tx ${i}:`, err.message);
+        console.warn(`Checking transaction status directly...`);
+        
         try {
-          const latestBlockhash = await connection.getLatestBlockhash('confirmed');
-          console.log(`Got latest blockhash for tx ${i}:`, latestBlockhash.blockhash);
+          const status = await connection.getSignatureStatus(sig);
+          console.log(`Direct status check for tx ${i}:`, status);
           
-          console.log(`Calling confirmTransaction for tx ${i}...`);
-          const confirmation = await connection.confirmTransaction({
-            signature: sig,
-            blockhash: latestBlockhash.blockhash,
-            lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
-          }, 'confirmed');
-          
-          console.log(`Confirmation result for tx ${i}:`, confirmation);
-          
-          if (confirmation.value.err) {
-            console.error(`Final tx ${i} on-chain error:`, confirmation.value.err);
-            throw new Error(`Transaction ${i} failed on-chain: ${JSON.stringify(confirmation.value.err)}`);
+          if (status.value?.confirmationStatus === 'confirmed' || status.value?.confirmationStatus === 'finalized') {
+            console.log(`Transaction ${i} is confirmed despite timeout`);
+          } else if (status.value?.err) {
+            throw new Error(`Transaction ${i} failed: ${JSON.stringify(status.value.err)}`);
+          } else {
+            console.warn(`Transaction ${i} status unknown after timeout, proceeding anyway`);
           }
-          
-          console.log(`Final tx ${i} confirmed on-chain.`);
-        } catch (err: any) {
-          // If confirmation times out, check if the transaction actually succeeded
-          console.warn(`Confirmation error for tx ${i}:`, err.message);
-          console.warn(`Checking transaction status directly...`);
-          
-          try {
-            const status = await connection.getSignatureStatus(sig);
-            console.log(`Direct status check for tx ${i}:`, status);
-            
-            if (status.value?.confirmationStatus === 'confirmed' || status.value?.confirmationStatus === 'finalized') {
-              console.log(`Transaction ${i} is confirmed despite timeout`);
-            } else if (status.value?.err) {
-              throw new Error(`Transaction ${i} failed: ${JSON.stringify(status.value.err)}`);
-            } else {
-              console.warn(`Transaction ${i} status unknown after timeout, proceeding anyway`);
-            }
-          } catch (statusErr) {
-            console.error(`Failed to check transaction status:`, statusErr);
-            // Don't throw if we can't check status, just warn
-            console.warn(`Could not verify tx ${i} status, proceeding with caution`);
-          }
+        } catch (statusErr) {
+          console.error(`Failed to check transaction status:`, statusErr);
+          // Don't throw if we can't check status, just warn
+          console.warn(`Could not verify tx ${i} status, proceeding with caution`);
         }
       }
     }
@@ -538,8 +552,7 @@ const handleConfirm = async () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
-        ...previewData.payload, 
-        ...previewData,
+        ...poolCreateTx,
         transactionSignatures: submittedSigs,
       }),
     });
@@ -551,8 +564,7 @@ const handleConfirm = async () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
-        ...previewData.payload, 
-        ...previewData, 
+        ...poolCreateTx, 
         createdAt: confirmJson.createdAt,
         transactionSignatures: submittedSigs,
       }),
@@ -602,23 +614,28 @@ const handleConfirm = async () => {
 
           {poolCreated && !isLoading ? (
             <PoolCreationSuccess />
-          ) : previewData ? (
+          ) : poolCreateTx ? (
             <div className="space-y-8">
               <div className="bg-white/5 rounded-xl p-8 backdrop-blur-sm border border-white/10">
-                <h2 className="text-2xl font-bold mb-4">
-                  Preview Pool Creation
-                </h2>
-                <p>Deposit SOL: {previewData.depositSol}</p>
-                {previewData.buySol > 0 && (
-                  <p>Purchase SOL: {previewData.buySol}</p>
-                )}
-                <div className="mt-6 flex gap-4 justify-end">
+                <h2 className="text-2xl font-bold mb-4">Review & Confirm</h2>
+
+                <p className="text-gray-300 mb-2">
+                  <span className="font-semibold">Token:</span> {poolCreateTx.name} ({poolCreateTx.symbol})
+                </p>
+                <p className="text-gray-300 mb-2">
+                  <span className="font-semibold">Configuration:</span> {poolCreateTx.config}
+                </p>
+                <p className="text-gray-300 mb-6 text-sm break-all">
+                  <span className="font-semibold">Base Mint:</span> {poolCreateTx.baseMint}
+                </p>
+
+                <div className="flex gap-4 justify-end">
                   <Button onClick={handleConfirm} disabled={isLoading}>
-                    {isLoading ? "Submitting..." : "Confirm & Launch Pool"}
+                    {isLoading ? 'Submitting…' : 'Sign & Launch'}
                   </Button>
                   <Button
                     variant="ghost"
-                    onClick={() => setPreviewData(null)}
+                    onClick={() => setPoolCreateTx(null)}
                     disabled={isLoading}
                   >
                     Cancel
