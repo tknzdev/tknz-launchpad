@@ -15,6 +15,33 @@ export function TerminalComponent({ mint }: { mint: string }) {
         initialInputMint: "So11111111111111111111111111111111111111112",
         initialOutputMint: mint,
       },
+      theme: {
+        palette: {
+          primary: { main: '#c7f284' },
+          secondary: { main: '#182430' },
+          background: { 
+            default: '#0b0e13',
+            paper: '#182430'
+          },
+          text: {
+            primary: '#c7f284',
+            secondary: '#a0a0a0'
+          },
+          error: { main: '#ff4d4d' },
+          warning: { main: '#ffb800' },
+          success: { main: '#c7f284' },
+          action: {
+            hover: '#2a3744',
+            selected: '#2a3744'
+          }
+        },
+        shape: {
+          borderRadius: 8
+        },
+        typography: {
+          fontFamily: '"JetBrains Mono", "Rajdhani", monospace'
+        }
+      }
     });
   }, [mint]);
 
@@ -49,6 +76,33 @@ export function TerminalComponent({ mint }: { mint: string }) {
             initialInputMint: "So11111111111111111111111111111111111111112",
             initialOutputMint: mint,
           },
+          theme: {
+            palette: {
+              primary: { main: '#c7f284' },
+              secondary: { main: '#182430' },
+              background: { 
+                default: '#0b0e13',
+                paper: '#182430'
+              },
+              text: {
+                primary: '#c7f284',
+                secondary: '#a0a0a0'
+              },
+              error: { main: '#ff4d4d' },
+              warning: { main: '#ffb800' },
+              success: { main: '#c7f284' },
+              action: {
+                hover: '#2a3744',
+                selected: '#2a3744'
+              }
+            },
+            shape: {
+              borderRadius: 8
+            },
+            typography: {
+              fontFamily: '"JetBrains Mono", "Rajdhani", monospace'
+            }
+          }
         });
       }, 1000);
     }
