@@ -29,9 +29,9 @@ export const TokenCard: React.FC<TokenCardProps> = ({
     <div
       ref={(el) => rowRef(el, pool.id)}
       data-pool-id={pool.id}
-      className="relative flex cursor-pointer items-center border-cyber-green-neon/20 py-3 pl-1.5 pr-2 text-xs has-hover:hover:bg-cyber-green-neon/5 has-hover:hover:border-cyber-green-neon/40 [&:nth-child(n+2)]:border-t transition-all duration-300 cyber-card"
+      className="relative flex cursor-pointer items-center border-cyber-green-neon/20 py-3 pl-1.5 pr-2 text-xs has-hover:hover:bg-cyber-green-neon/5 has-hover:hover:border-cyber-green-neon/40 [&:nth-child(n+2)]:border-t transition-all duration-300 cyber-card group"
     >
-      <div className="shrink-0 pl-2 pr-4">
+      <div className="shrink-0 pl-2 pr-4 transition-transform duration-300 group-hover:scale-105">
         <TrenchesPoolTokenIcon width={54} height={54} pool={pool} />
       </div>
 
@@ -42,7 +42,7 @@ export const TokenCard: React.FC<TokenCardProps> = ({
           <div className="overflow-hidden">
             <div className="flex items-center gap-0.5 xl:gap-1">
               <div
-                className="whitespace-nowrap text-sm font-semibold text-cyber-green-neon cyber-mono"
+                className="whitespace-nowrap text-sm font-semibold text-cyber-green-neon cyber-mono transition-colors duration-300 group-hover:text-cyber-green-terminal"
                 title={pool.baseAsset.symbol}
               >
                 {pool.baseAsset.symbol}
@@ -52,12 +52,12 @@ export const TokenCard: React.FC<TokenCardProps> = ({
                 <Copyable
                   name="Address"
                   copyText={pool.baseAsset.id}
-                  className="z-[1] flex min-w-0 items-center gap-0.5 text-[0.625rem] leading-none text-cyber-green-neon/60 duration-500 hover:text-cyber-green-neon data-[copied=true]:text-cyber-green-terminal"
+                  className="z-[1] flex min-w-0 items-center gap-0.5 text-[0.625rem] leading-none text-cyber-green-neon/60 duration-500 hover:text-cyber-green-terminal data-[copied=true]:text-cyber-green-terminal group-hover:text-cyber-green-neon/80"
                 >
                   {(copied) => (
                     <>
                       <div
-                        className="truncate text-xs"
+                        className="truncate text-xs transition-colors duration-300"
                         title={pool.baseAsset.name}
                       >
                         {pool.baseAsset.name}
@@ -66,7 +66,7 @@ export const TokenCard: React.FC<TokenCardProps> = ({
                         <div className="iconify h-3 w-3 shrink-0 text-cyber-green-terminal ph--check-bold" />
                       ) : (
                         <CopyIconSVG
-                          className="h-3 w-3 shrink-0"
+                          className="h-3 w-3 shrink-0 transition-opacity duration-300 opacity-60 hover:opacity-100"
                           width={12}
                           height={12}
                         />
@@ -83,10 +83,10 @@ export const TokenCard: React.FC<TokenCardProps> = ({
         <div className="flex w-full items-center justify-between">
           <div className="flex items-center gap-1.5">
             <TokenAge
-              className="opacity-80 cyber-mono text-cyber-green-neon/70"
+              className="opacity-80 cyber-mono text-cyber-green-neon/70 transition-colors duration-300 group-hover:text-cyber-green-neon/90"
               date={pool.createdAt}
             />
-            <TokenSocials className="z-[1]" token={pool.baseAsset} />
+            <TokenSocials className="z-[1] transition-opacity duration-300 group-hover:opacity-90" token={pool.baseAsset} />
           </div>
 
           {/* Token metric */}
@@ -101,7 +101,7 @@ export const TokenCard: React.FC<TokenCardProps> = ({
       </div>
 
       <Link
-        className="absolute inset-0 cursor-pointer rounded-none"
+        className="absolute inset-0 cursor-pointer rounded-none transition-opacity duration-300 hover:bg-cyber-green-neon/5"
         href={`/token/${pool.baseAsset.id}`}
       />
     </div>
