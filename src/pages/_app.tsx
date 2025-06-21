@@ -7,7 +7,7 @@ import {
   SolflareWalletAdapter,
 } from "@solana/wallet-adapter-wallets";
 import { TknzWalletAdapter } from "@/utils/TknzWalletAdapter";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useWindowWidthListener } from "@/lib/device";
 
@@ -27,6 +27,49 @@ export default function App({ Component, pageProps }: AppProps) {
   const queryClient = useMemo(() => new QueryClient(), []);
 
   useWindowWidthListener();
+
+  useEffect(() => {
+    // Global style override observer
+    const applyThemeOverrides = () => {
+      // Override all white backgrounds
+      document.querySelectorAll('[style*="background-color: white"], [style*="background-color: rgb(255, 255, 255)"]').forEach(el => {
+        (el as HTMLElement).style.backgroundColor = '#182430';
+      });
+      
+      // Override all white text
+      document.querySelectorAll('[style*="color: white"], [style*="color: rgb(255, 255, 255)"]').forEach(el => {
+        (el as HTMLElement).style.color = '#c7f284';
+      });
+      
+      // Fix table headers
+      document.querySelectorAll('th').forEach(el => {
+        (el as HTMLElement).style.color = '#c7f284';
+      });
+      
+      // Fix chart buttons
+      document.querySelectorAll('[class*="button-"][aria-pressed="true"]').forEach(el => {
+        (el as HTMLElement).style.backgroundColor = '#c7f284';
+        (el as HTMLElement).style.color = '#0b0e13';
+      });
+    };
+
+    // Apply immediately
+    applyThemeOverrides();
+
+    // Monitor for changes
+    const observer = new MutationObserver(() => {
+      applyThemeOverrides();
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['style', 'class']
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
