@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { z } from "zod";
@@ -27,6 +27,11 @@ const poolSchema = z.object({
     .url({ message: "Please enter a valid URL" })
     .optional()
     .or(z.literal("")),
+// Optional initial buy amount in tokens
+  buyAmount: z.preprocess((val) => {
+    if (val === '' || val == null) return undefined;
+    return typeof val === 'string' ? parseFloat(val) : val;
+  }, z.number().min(0).optional()),
 });
 
 interface CreateMeteoraTokenResponse {
@@ -55,6 +60,8 @@ interface FormValues {
   tokenLogo: File | undefined;
   website?: string;
   twitter?: string;
+  /** Optional initial buy amount in tokens */
+  buyAmount?: number;
 }
 
 /**
@@ -112,6 +119,42 @@ export default function CreatePool() {
    */
   const [poolConfigs, setPoolConfigs] = useState<PoolConfig[]>([]);
   const [selectedConfigPubkey, setSelectedConfigPubkey] = useState<string | null>(null);
+  // Estimated token output for initial buy
+  const [estimatedAmountOut, setEstimatedAmountOut] = useState<string | null>(null);
+  const [estimateError, setEstimateError] = useState<string | null>(null);
+  // Endpoint for estimating amount out
+  const ESTIMATE_URL =
+    process.env.NEXT_PUBLIC_ESTIMATE_AMOUNT_OUT_URL ||
+    'https://tknz.fun/.netlify/functions/estimate-amount-out';
+  /**
+   * Fetch estimated base token amount for a given SOL input
+   */
+  const estimateOut = useCallback(
+    async (buyAmountSol: number) => {
+      if (!selectedConfigPubkey) return;
+      const cfg = poolConfigs.find((c) => c.pubkey === selectedConfigPubkey);
+      if (!cfg?.config) return;
+      try {
+        setEstimateError(null);
+        const res = await fetch(ESTIMATE_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ config: cfg.config, buyAmountSol }),
+        });
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(text || res.statusText);
+        }
+        const json = await res.json();
+        setEstimatedAmountOut(json.amountOut);
+      } catch (err: any) {
+        console.error('Estimate error', err);
+        setEstimatedAmountOut(null);
+        setEstimateError(err.message || 'Estimation failed');
+      }
+    },
+    [selectedConfigPubkey, poolConfigs, ESTIMATE_URL],
+  );
 
   // Fetch available pool configs once on mount
   useEffect(() => {
@@ -144,6 +187,7 @@ export default function CreatePool() {
       tokenLogo: undefined,
       website: "",
       twitter: "",
+      buyAmount: 0
     } as FormValues,
     onSubmit: async ({ value }) => {
       setIsLoading(true);
@@ -169,7 +213,7 @@ export default function CreatePool() {
           reader.readAsDataURL(value.tokenLogo!);
         });
 
-        const payload = {
+        const payload: any = {
           walletAddress: publicKey.toBase58(),
           configKey: selectedConfigPubkey,
           token: {
@@ -180,6 +224,8 @@ export default function CreatePool() {
             websiteUrl: value.website || undefined,
             twitter: value.twitter || undefined,
           },
+        // Optional initial buy amount in tokens
+          buyAmount: value.buyAmount || 0
         };
 
         const url =
@@ -796,6 +842,51 @@ const handleConfirm = async () => {
                 {selectedConfigPubkey === null && poolConfigs.length > 0 && (
                   <p className="text-red-400 text-sm mt-2">Please select a configuration</p>
                 )}
+              </div>
+              {/* Initial Buy Section */}
+              <div className="bg-white/5 rounded-xl p-8 backdrop-blur-sm border border-white/10">
+                <h2 className="text-2xl font-bold mb-4">Initial Buy (optional)</h2>
+                <div className="mb-4">
+                  <label
+                    htmlFor="buyAmount"
+                    className="block text-sm font-medium text-gray-300 mb-1"
+                  >
+                    Initial Buy (Tokens)
+                  </label>
+                  {form.Field({
+                    name: "buyAmount",
+                    children: (field) => (
+                      <input
+                        id="buyAmount"
+                        name={field.name}
+                        type="text"
+                        className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white"
+                        placeholder="e.g. 100"
+                        value={field.state.value}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          field.handleChange(val);
+                          const sol = parseFloat(val);
+                          if (!isNaN(sol) && sol > 0) {
+                            estimateOut(sol);
+                          } else {
+                            setEstimatedAmountOut(null);
+                            setEstimateError(null);
+                          }
+                        }}
+                      />
+                    )
+                  })}
+                  {/* Display estimated token output or error */}
+                  {estimatedAmountOut !== null && (
+                    <p className="mt-2 text-sm text-gray-200">
+                      Estimated tokens: {estimatedAmountOut}
+                    </p>
+                  )}
+                  {estimateError && (
+                    <p className="mt-2 text-sm text-red-400">{estimateError}</p>
+                  )}
+                </div>
               </div>
 
               {/* Social Links Section */}
