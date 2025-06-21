@@ -588,3 +588,72 @@ table * {
   color: #0b0e13 !important;
   opacity: 1;
 }
+
+/* Token Stats Tabs Enhancement */
+[role="group"] [role="radio"] {
+  position: relative;
+  isolation: isolate;
+}
+
+/* Remove the old styles and add new ones */
+[role="group"] [role="radio"][data-state="on"] {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px rgba(199, 242, 132, 0.4),
+      inset 0 0 20px rgba(0, 0, 0, 0.3);
+  }
+  50% {
+    box-shadow: 
+      0 0 30px rgba(199, 242, 132, 0.6),
+      inset 0 0 20px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Ensure the active tab text is properly styled */
+[role="group"] [role="radio"][data-state="on"] * {
+  color: #0b0e13 !important;
+}
+
+/* Add a subtle border glow to the container */
+[role="group"] > div {
+  position: relative;
+}
+
+[role="group"] > div::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(45deg, #c7f284, #39ff14);
+  border-radius: 0.5rem;
+  opacity: 0.3;
+  z-index: -1;
+  animation: rotate-gradient 3s linear infinite;
+}
+
+@keyframes rotate-gradient {
+  0% {
+    filter: hue-rotate(0deg);
+  }
+  100% {
+    filter: hue-rotate(360deg);
+  }
+}
+
+/* Remove old divider styles since we're using gap now */
+[role="group"] > div > [role="radio"]:not(:last-child) {
+  border-right: none !important;
+}
+
+/* Enhance hover transition */
+[role="group"] [role="radio"] {
+  cursor: pointer;
+  user-select: none;
+}
+
+[role="group"] [role="radio"]:active {
+  transform: scale(0.98);
+}
