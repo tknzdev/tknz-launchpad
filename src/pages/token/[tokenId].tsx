@@ -1,5 +1,4 @@
 import { TokenPageMsgHandler } from "@/components/Token/TokenPageMsgHandler";
-import { TokenChart } from "@/components/TokenChart/TokenChart";
 import { TokenDetails } from "@/components/TokenHeader/TokenDetail";
 import { TokenHeader } from "@/components/TokenHeader/TokenHeader";
 import { TokenStats } from "@/components/TokenHeader/TokenStats";
@@ -16,6 +15,10 @@ import dynamic from "next/dynamic";
 import { useEffect } from "react";
 
 const Terminal = dynamic(() => import("@/components/Terminal"), { ssr: false });
+const TokenChart = dynamic(
+  () => import("@/components/TokenChart/TokenChart").then((mod) => mod.TokenChart),
+  { ssr: false }
+);
 
 const SwapWidget = () => {
   const tokenId = useTokenAddress();
