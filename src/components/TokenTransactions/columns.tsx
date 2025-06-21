@@ -31,14 +31,14 @@ export const columns: ColumnDef<Tx>[] = [
           }}
         >
           <ToggleGroupPrimitive.ToggleGroupItem
-            className="duration-150 data-[state=off]:text-neutral-600 data-[state=on]:text-neutral-400 data-[state=off]:hover:text-neutral-400"
+            className="duration-300 text-xs data-[state=off]:text-cyber-green-neon/40 data-[state=on]:text-cyber-green-neon data-[state=off]:hover:text-cyber-green-neon/70 transition-colors"
             value={DateMode.DATE}
           >
             {`Date`}
           </ToggleGroupPrimitive.ToggleGroupItem>
-          <span className="text-neutral-600">/</span>
+          <span className="text-cyber-green-neon/40">/</span>
           <ToggleGroupPrimitive.ToggleGroupItem
-            className="duration-150 data-[state=off]:text-neutral-600 data-[state=on]:text-neutral-400 data-[state=off]:hover:text-neutral-400"
+            className="duration-300 text-xs data-[state=off]:text-cyber-green-neon/40 data-[state=on]:text-cyber-green-neon data-[state=off]:hover:text-cyber-green-neon/70 transition-colors"
             value={DateMode.AGE}
           >
             {`Age`}
