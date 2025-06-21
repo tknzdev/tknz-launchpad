@@ -11,8 +11,9 @@ import {
   createContext,
   useCallback,
   useContext,
-  useLayoutEffect,
+  useEffect,
   useRef,
+  useState,
 } from "react";
 import { Pool } from "./types";
 import { GetChartRequest } from "@/components/Explore/types";
@@ -21,6 +22,7 @@ import { useTokenInfo } from "@/hooks/queries";
 import { useWallet } from "@jup-ag/wallet-adapter";
 import { asMarks } from "./TokenChart/marks";
 import { getNextBar } from "./TokenChart/bars";
+import { useIsomorphicLayoutEffect } from "@/utils/useIsomorphicLayoutEffect";
 
 const SMALL_TRADE_VALUE = 0.05;
 
@@ -53,17 +55,23 @@ export const TokenChartProvider: React.FC<PropsWithChildren> = ({
 
   // Required to calculate chart mcap
   const { data: baseAsset } = useTokenInfo((pool) => pool.baseAsset);
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
+    if (!baseAsset) {
+      return;
+    }
     baseAssetRef.current = baseAsset;
-  }, [baseAsset, baseAssetRef]);
+  }, [baseAsset]);
 
   // Required to display user marks
   const { publicKey } = useWallet();
   const address = publicKey?.toBase58();
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
+    if (!address) {
+      return;
+    }
     userAddressRef.current = address;
-  }, [address, userAddressRef]);
+  }, [address]);
 
   useDataStreamListener(
     ["actions"],
