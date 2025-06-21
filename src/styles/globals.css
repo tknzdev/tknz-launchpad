@@ -335,3 +335,256 @@ body::after {
     letter-spacing: 2px;
   }
 }
+
+/* Jupiter Terminal Theme Override */
+#jupiter-terminal {
+  --jupiter-primary: #c7f284 !important;
+  --jupiter-secondary: #0b0e13 !important;
+  --jupiter-background: #0b0e13 !important;
+  --jupiter-background-secondary: #182430 !important;
+  --jupiter-text-primary: #c7f284 !important;
+  --jupiter-text-secondary: #a0a0a0 !important;
+  --jupiter-border: #2a3744 !important;
+  --jupiter-hover: #2a3744 !important;
+  --jupiter-success: #c7f284 !important;
+  --jupiter-error: #ff4d4d !important;
+  --jupiter-warning: #ffb800 !important;
+}
+
+/* Override Jupiter Terminal specific elements */
+#jupiter-terminal * {
+  color: inherit !important;
+}
+
+#jupiter-terminal .jupiter-swap-container {
+  background-color: #0b0e13 !important;
+  border: 1px solid #2a3744 !important;
+}
+
+#jupiter-terminal .jupiter-input-container {
+  background-color: #182430 !important;
+  border: 1px solid #2a3744 !important;
+}
+
+#jupiter-terminal input {
+  background-color: #182430 !important;
+  color: #c7f284 !important;
+  border: 1px solid #2a3744 !important;
+}
+
+#jupiter-terminal input:focus {
+  border-color: #c7f284 !important;
+  box-shadow: 0 0 10px rgba(199, 242, 132, 0.2) !important;
+}
+
+#jupiter-terminal button {
+  background-color: #182430 !important;
+  color: #c7f284 !important;
+  border: 1px solid #2a3744 !important;
+  transition: all 0.3s ease !important;
+}
+
+#jupiter-terminal button:hover {
+  background-color: #2a3744 !important;
+  border-color: #c7f284 !important;
+  box-shadow: 0 0 10px rgba(199, 242, 132, 0.2) !important;
+}
+
+#jupiter-terminal .jupiter-swap-button {
+  background-color: #c7f284 !important;
+  color: #0b0e13 !important;
+  font-weight: 600 !important;
+}
+
+#jupiter-terminal .jupiter-swap-button:hover {
+  background-color: #a9d66d !important;
+  box-shadow: 0 0 20px rgba(199, 242, 132, 0.4) !important;
+}
+
+#jupiter-terminal .jupiter-token-select {
+  background-color: #182430 !important;
+  border: 1px solid #2a3744 !important;
+  color: #c7f284 !important;
+}
+
+#jupiter-terminal .jupiter-token-select:hover {
+  background-color: #2a3744 !important;
+  border-color: #c7f284 !important;
+}
+
+#jupiter-terminal .jupiter-dropdown {
+  background-color: #0b0e13 !important;
+  border: 1px solid #2a3744 !important;
+}
+
+#jupiter-terminal .jupiter-dropdown-item {
+  background-color: transparent !important;
+  color: #c7f284 !important;
+}
+
+#jupiter-terminal .jupiter-dropdown-item:hover {
+  background-color: #2a3744 !important;
+}
+
+#jupiter-terminal .jupiter-settings-panel {
+  background-color: #0b0e13 !important;
+  border: 1px solid #2a3744 !important;
+}
+
+#jupiter-terminal .jupiter-slippage-container {
+  background-color: #182430 !important;
+  border: 1px solid #2a3744 !important;
+}
+
+/* Override any white text */
+#jupiter-terminal span,
+#jupiter-terminal p,
+#jupiter-terminal div,
+#jupiter-terminal label {
+  color: #c7f284 !important;
+}
+
+/* Override white backgrounds */
+#jupiter-terminal .bg-white,
+#jupiter-terminal [class*="bg-white"] {
+  background-color: #182430 !important;
+}
+
+/* Override text colors */
+#jupiter-terminal .text-white,
+#jupiter-terminal [class*="text-white"] {
+  color: #c7f284 !important;
+}
+
+#jupiter-terminal .text-black,
+#jupiter-terminal [class*="text-black"] {
+  color: #c7f284 !important;
+}
+
+/* Jupiter Terminal specific overrides for common classes */
+#jupiter-terminal [class*="bg-gray"] {
+  background-color: #182430 !important;
+}
+
+#jupiter-terminal [class*="border-gray"] {
+  border-color: #2a3744 !important;
+}
+
+#jupiter-terminal [class*="text-gray"] {
+  color: #a0a0a0 !important;
+}
+
+/* Override hover states */
+#jupiter-terminal *:hover {
+  transition: all 0.3s ease !important;
+}
+
+/* Ensure proper contrast for readability */
+#jupiter-terminal .jupiter-price-info {
+  color: #c7f284 !important;
+  opacity: 0.8;
+}
+
+#jupiter-terminal .jupiter-balance {
+  color: #c7f284 !important;
+  opacity: 0.7;
+}
+
+/* TradingView Chart Overrides - More Aggressive */
+/* Target all possible button states in the chart */
+[class*="button-"][class*="selected"],
+[class*="button-"][class*="active"],
+[class*="button-"][aria-pressed="true"],
+[class*="button-"][data-active="true"],
+[class*="button-"][data-selected="true"] {
+  background-color: #c7f284 !important;
+  color: #0b0e13 !important;
+}
+
+/* Override white backgrounds in chart area */
+div[class*="chart-"] button,
+div[class*="chart-"] [class*="button-"] {
+  background-color: transparent !important;
+  color: #c7f284 !important;
+}
+
+div[class*="chart-"] button:hover,
+div[class*="chart-"] [class*="button-"]:hover {
+  background-color: #2a3744 !important;
+}
+
+/* Selected state for chart buttons */
+div[class*="chart-"] button[aria-pressed="true"],
+div[class*="chart-"] [class*="button-"][aria-pressed="true"],
+div[class*="chart-"] .selected,
+div[class*="chart-"] [class*="selected"] {
+  background-color: #c7f284 !important;
+  color: #0b0e13 !important;
+}
+
+/* Table Header Overrides */
+table th {
+  color: #c7f284 !important;
+  opacity: 0.7;
+  background-color: #0b0e13 !important;
+}
+
+table thead {
+  background-color: #0b0e13 !important;
+  border-bottom: 1px solid #2a3744 !important;
+}
+
+/* Override any remaining white text in tables */
+table * {
+  color: inherit !important;
+}
+
+/* Date/Age Toggle Specific Override */
+[role="group"] button[role="radio"] {
+  color: #c7f284 !important;
+  opacity: 0.5;
+}
+
+[role="group"] button[role="radio"]:hover {
+  opacity: 0.8;
+}
+
+[role="group"] button[role="radio"][data-state="on"],
+[role="group"] button[role="radio"][aria-checked="true"] {
+  opacity: 1;
+  color: #c7f284 !important;
+}
+
+/* Force override any white backgrounds globally */
+* {
+  --tw-bg-opacity: 1;
+}
+
+.bg-white {
+  background-color: #182430 !important;
+}
+
+.text-white {
+  color: #c7f284 !important;
+}
+
+/* Chart specific time interval buttons */
+#tradingview-chart button,
+[id*="tradingview"] button {
+  background-color: transparent !important;
+  color: #c7f284 !important;
+  opacity: 0.7;
+}
+
+#tradingview-chart button:hover,
+[id*="tradingview"] button:hover {
+  background-color: #2a3744 !important;
+  opacity: 1;
+}
+
+#tradingview-chart button[aria-pressed="true"],
+[id*="tradingview"] button[aria-pressed="true"] {
+  background-color: #c7f284 !important;
+  color: #0b0e13 !important;
+  opacity: 1;
+}
