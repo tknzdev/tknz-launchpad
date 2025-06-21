@@ -2,12 +2,12 @@ import {
   CSSProperties,
   memo,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
 import { useLocalStorage } from "react-use";
+import { useIsomorphicLayoutEffect } from "@/utils/useIsomorphicLayoutEffect";
 
 import { createDataFeed } from "./datafeed";
 import { formatChartPrice, getPrecisionTickSizeText } from "./formatter";
@@ -140,7 +140,7 @@ export const TokenChart: React.FC<ChartProps> = memo(
       userAddressRef,
     } = useTokenChart();
 
-    useLayoutEffect(() => {
+    useIsomorphicLayoutEffect(() => {
       if (!chartConfig) {
         return;
       }
@@ -213,7 +213,7 @@ export const TokenChart: React.FC<ChartProps> = memo(
             theme: "dark",
             autosize: true,
             auto_save_delay: 1,
-            custom_css_url: `${TRADING_VIEW_DOMAIN}/tv/css/tokenchart.css`,
+            custom_css_url: "/css/tokenchart.css",
             // Don't do override anymore, edit from template
             settings_overrides: {
               "chartEventsSourceProperties.breaks.visible": false,
@@ -221,6 +221,8 @@ export const TokenChart: React.FC<ChartProps> = memo(
               "paneProperties.backgroundType": "solid",
               "paneProperties.background": CHART_BG_COLOR,
               "scalesProperties.fontSize": isMobile ? 7 : 12,
+              "scalesProperties.textColor": "#c7f284",
+              "scalesProperties.lineColor": "#182430",
             },
             overrides: {
               "mainSeriesProperties.highLowAvgPrice.highLowPriceLabelsVisible":
@@ -231,6 +233,18 @@ export const TokenChart: React.FC<ChartProps> = memo(
               "paneProperties.vertGridProperties.color": CHART_GRID_LINE_COLOR, // neutral-850
               "paneProperties.horzGridProperties.style": 2, // dashed
               "paneProperties.horzGridProperties.color": CHART_GRID_LINE_COLOR, // neutral-850
+              // Style the chart elements
+              "mainSeriesProperties.candleStyle.upColor": "#c7f284",
+              "mainSeriesProperties.candleStyle.downColor": "#FF4D4D",
+              "mainSeriesProperties.candleStyle.wickUpColor": "#c7f284",
+              "mainSeriesProperties.candleStyle.wickDownColor": "#FF4D4D",
+              "mainSeriesProperties.candleStyle.borderUpColor": "#c7f284",
+              "mainSeriesProperties.candleStyle.borderDownColor": "#FF4D4D",
+              // Style the time buttons
+              "timeFramesProperties.color": "#c7f284",
+              "timeFramesProperties.selectedColor": "#c7f284",
+              "timeFramesProperties.backgroundColor": "#182430",
+              "timeFramesProperties.selectedBackgroundColor": "#0b0e13",
             },
             width: "100%" as any, // Ignore this typing, this fills to container
             height: "100%" as any, // Ignore this typing, this fills to container
@@ -345,6 +359,38 @@ export const TokenChart: React.FC<ChartProps> = memo(
                 "window.onChartReady: missing activechart, breaking!",
               );
               return;
+            }
+
+            // Inject custom styles into the TradingView iframe
+            try {
+              const iframe = document.querySelector(`#${htmlId} iframe`) as HTMLIFrameElement;
+              if (iframe && iframe.contentDocument) {
+                const style = iframe.contentDocument.createElement('style');
+                style.textContent = `
+                  /* Override TradingView button styles */
+                  .button-1VVj8kLG,
+                  [class*="button-"] {
+                    background-color: transparent !important;
+                    color: #c7f284 !important;
+                  }
+                  
+                  .button-1VVj8kLG:hover,
+                  [class*="button-"]:hover {
+                    background-color: #2a3744 !important;
+                  }
+                  
+                  .button-1VVj8kLG.selected-2DhgVxEU,
+                  .button-1VVj8kLG[aria-pressed="true"],
+                  [class*="button-"][aria-pressed="true"],
+                  [class*="selected"] {
+                    background-color: #c7f284 !important;
+                    color: #0b0e13 !important;
+                  }
+                `;
+                iframe.contentDocument.head.appendChild(style);
+              }
+            } catch (e) {
+              console.log('Could not inject styles into TradingView iframe:', e);
             }
 
             const studies = activeChart.getAllStudies();
