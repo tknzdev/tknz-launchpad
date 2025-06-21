@@ -73,17 +73,22 @@ const ToggleGroupItem = React.forwardRef<
     <ToggleGroupPrimitive.Item
       ref={ref}
       className={cn(
-        "flex flex-col items-center justify-center whitespace-nowrap p-1.5 text-neutral-500 transition-all",
-        "data-[state=off]:hover:bg-neutral-925 data-[state=off]:hover:text-neutral-300",
-        "data-[state=on]:bg-neutral-900",
+        "flex flex-col items-center justify-center whitespace-nowrap p-1.5 text-neutral-500 transition-all duration-300",
+        "data-[state=off]:hover:bg-neutral-925 data-[state=off]:hover:text-cyber-green-neon/80",
+        "data-[state=on]:bg-neutral-900 data-[state=on]:text-cyber-green-neon",
         "disabled:pointer-events-none disabled:opacity-50",
+        "rounded-md hover:scale-105",
         className,
       )}
       value={value}
       {...props}
     >
-      <span>{value}</span>
-      <div className={cn("font-medium", getNumberColorCn(priceChange))}>
+      <span className="transition-colors duration-300">{value}</span>
+      <div className={cn(
+        "font-medium transition-all duration-300", 
+        getNumberColorCn(priceChange),
+        "data-[state=on]:scale-110"
+      )}>
         {formatReadablePercentChange(priceChange, { hideSign: "positive" })}
       </div>
     </ToggleGroupPrimitive.Item>
