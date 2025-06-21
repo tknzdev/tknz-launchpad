@@ -27,7 +27,7 @@ export const TokenStats: React.FC<TokenStatsProps> = memo(({ className }) => {
 
   return (
     <ToggleGroupPrimitive.Root
-      className={className}
+      className={cn("mb-2", className)}
       type="single"
       defaultValue={DEFAULT_TIMEFRAME}
       value={timeframe}
@@ -39,7 +39,8 @@ export const TokenStats: React.FC<TokenStatsProps> = memo(({ className }) => {
     >
       <div
         className={cn(
-          "overflow-y-none grid grid-cols-4 divide-x divide-neutral-850 overflow-x-auto border border-neutral-850 text-xs rounded-t-lg",
+          "grid grid-cols-4 gap-[1px] p-[1px] rounded-lg bg-cyber-green-neon/20",
+          "shadow-[0_0_20px_rgba(199,242,132,0.1)]"
         )}
       >
         <ToggleGroupItem value={TokenStatsTimeframe.MIN_5} />
@@ -73,21 +74,39 @@ const ToggleGroupItem = React.forwardRef<
     <ToggleGroupPrimitive.Item
       ref={ref}
       className={cn(
-        "flex flex-col items-center justify-center whitespace-nowrap p-1.5 text-neutral-500 transition-all duration-300",
-        "data-[state=off]:hover:bg-neutral-925 data-[state=off]:hover:text-cyber-green-neon/80",
-        "data-[state=on]:bg-neutral-900 data-[state=on]:text-cyber-green-neon",
+        "flex flex-col items-center justify-center whitespace-nowrap py-3 px-4",
+        "bg-black/90 text-cyber-green-neon/60",
+        "transition-all duration-300 ease-out",
+        "first:rounded-l-md last:rounded-r-md",
+        "relative overflow-hidden isolate",
+        // Hover state
+        "hover:text-cyber-green-neon/80 hover:bg-black/70",
+        // Active state
+        "data-[state=on]:bg-cyber-green-neon data-[state=on]:text-black",
+        "data-[state=on]:font-bold data-[state=on]:shadow-[inset_0_0_20px_rgba(0,0,0,0.3)]",
+        // Glow effect for active state
+        "data-[state=on]:after:absolute data-[state=on]:after:inset-0",
+        "data-[state=on]:after:bg-gradient-to-t data-[state=on]:after:from-transparent data-[state=on]:after:to-white/10",
+        "data-[state=on]:after:-z-10",
+        // Disabled state
         "disabled:pointer-events-none disabled:opacity-50",
-        "rounded-md hover:scale-105",
         className,
       )}
       value={value}
       {...props}
     >
-      <span className="transition-colors duration-300">{value}</span>
+      <span className={cn(
+        "text-xs font-medium tracking-wider uppercase transition-all duration-300",
+        "data-[state=on]:text-black"
+      )}>
+        {value}
+      </span>
       <div className={cn(
-        "font-medium transition-all duration-300", 
-        getNumberColorCn(priceChange),
-        "data-[state=on]:scale-110"
+        "text-sm font-bold mt-0.5 transition-all duration-300",
+        "data-[state=off]:opacity-80",
+        priceChange !== undefined && priceChange >= 0 
+          ? "data-[state=off]:text-cyber-green-terminal data-[state=on]:text-black" 
+          : "data-[state=off]:text-red-500 data-[state=on]:text-black/90"
       )}>
         {formatReadablePercentChange(priceChange, { hideSign: "positive" })}
       </div>
