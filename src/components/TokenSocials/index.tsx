@@ -35,13 +35,12 @@ export const TokenSocials: React.FC<TokenSocialsProps> = memo(
       >
         <HoverPopover content={`Search CA on X`} sideOffset={4}>
           <ExternalLink
-            className="group/icon"
+            className="group/icon relative"
             onClick={handleClick}
             href={`https://x.com/search?q=${token.id}`}
           >
             <SearchIcon
-              // Must override the icon classes, if not we can declare on parent
-              className="text-[--icon-color] opacity-60 group-hover/icon:opacity-100"
+              className="text-[--icon-color] opacity-60 transition-all duration-300 group-hover/icon:opacity-100 group-hover/icon:text-cyber-green-neon group-hover/icon:scale-110"
               aria-label={`Search CA on X`}
               width={12}
               height={12}
@@ -50,20 +49,26 @@ export const TokenSocials: React.FC<TokenSocialsProps> = memo(
         </HoverPopover>
         {token.telegram && (
           <ExternalLink
-            className="text-[--icon-color] opacity-60 hover:opacity-100"
+            className="group/icon relative"
             onClick={handleClick}
             href={token.telegram}
           >
-            <TelegramIcon aria-label="Telegram" />
+            <TelegramIcon 
+              className="text-[--icon-color] opacity-60 transition-all duration-300 group-hover/icon:opacity-100 group-hover/icon:text-cyber-green-neon group-hover/icon:scale-110"
+              aria-label="Telegram" 
+            />
           </ExternalLink>
         )}
         {token.website && (
           <ExternalLink
-            className="text-[--icon-color] opacity-60 hover:opacity-100"
+            className="group/icon relative"
             onClick={handleClick}
             href={token.website}
           >
-            <WebsiteIcon aria-label="Website" />
+            <WebsiteIcon 
+              className="text-[--icon-color] opacity-60 transition-all duration-300 group-hover/icon:opacity-100 group-hover/icon:text-cyber-green-neon group-hover/icon:scale-110"
+              aria-label="Website" 
+            />
           </ExternalLink>
         )}
       </span>
