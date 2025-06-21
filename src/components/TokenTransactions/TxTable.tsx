@@ -155,7 +155,7 @@ export function TxTable<TData, TValue>({
         }}
       >
         <Table className="text-xs">
-          <TableHeader className="sticky -top-px z-10 bg-neutral-950">
+          <TableHeader className="sticky -top-px z-10 bg-neutral-950 border-b border-neutral-850">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} isSticky>
                 {headerGroup.headers.map((header) => {
