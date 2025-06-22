@@ -30,13 +30,13 @@ const ExploreGrid = ({ className }: ExploreGridProps) => {
   return (
     <div
       className={cn(
-        "grid grid-cols-1 border-cyber-green-neon/30 max-lg:grid-rows-[auto_1fr] lg:grid-cols-3 lg:border xl:overflow-hidden cyber-card",
+        "grid grid-cols-1 border-2 border-cyber-green-neon max-lg:grid-rows-[auto_1fr] lg:grid-cols-3 xl:overflow-hidden bg-black rounded-xl shadow-[0_0_30px_rgba(0,255,65,0.4)] overflow-hidden",
         className,
       )}
     >
       <MobileExploreTabs />
 
-      <div className="contents divide-x divide-cyber-green-neon/30">
+      <div className="contents divide-x-2 divide-cyber-green-neon">
         <ExploreColumn tab={isMobile ? mobileTab : ExploreTab.NEW} />
         {!isMobile && <ExploreColumn tab={ExploreTab.GRADUATING} />}
         {!isMobile && <ExploreColumn tab={ExploreTab.GRADUATED} />}
