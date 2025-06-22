@@ -86,11 +86,20 @@ export class TknzWalletAdapter extends BaseWalletAdapter<'Tknz Extension'> {
       throw new WalletError('Tknz wallet is not supported in this environment');
     }
 
-    if (this.readyState === WalletReadyState.NotDetected) {
+    this._connecting = true;
+
+    // Wait for the extension SDK to be injected into the page (max 2s)
+    const maxWaitMs = 2000;
+    const pollIntervalMs = 50;
+    const startTime = Date.now();
+    while (!(window as any).tknz && Date.now() - startTime < maxWaitMs) {
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise((res) => setTimeout(res, pollIntervalMs));
+    }
+    if (!(window as any).tknz) {
+      this._connecting = false;
       throw new WalletError('Tknz wallet extension not detected');
     }
-
-    this._connecting = true;
 
     const { success, publicKey } = await new Promise<{
       success: boolean;
