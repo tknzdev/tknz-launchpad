@@ -20,17 +20,15 @@ export const Metric: React.FC<MetricProps> = ({
   tooltip,
   className,
 }) => (
-  <HoverPopover content={tooltip} asChild>
-    <button
-      className={cn(
-        "z-[1] flex items-center gap-0.5 text-neutral-500",
-        className,
-      )}
-    >
-      {label}
-      {children}
-    </button>
-  </HoverPopover>
+  <div
+    className={cn(
+      "z-[1] flex items-center gap-1 text-cyber-green-neon font-semibold",
+      className,
+    )}
+  >
+    {label}
+    {children}
+  </div>
 );
 
 type TokenCardTopHoldersMetricProps = {
@@ -177,25 +175,22 @@ export const TokenCardVolumeMetric: React.FC<TokenCardVolumeMetricProps> = ({
   buyVolume,
   sellVolume,
 }) => {
-  const volume =
-    buyVolume === undefined && sellVolume === undefined
-      ? undefined
-      : (buyVolume ?? 0) + (sellVolume ?? 0);
-
-  const isAboveThreshold = useMemo(() => volume && volume >= 500_000, [volume]);
+  const volume = useMemo(() => {
+    const buy = buyVolume || 0;
+    const sell = sellVolume || 0;
+    return buy + sell;
+  }, [buyVolume, sellVolume]);
 
   return (
-    <Metric label="V" tooltip="Volume" className="text-sm">
+    <div className="flex items-center gap-1 text-sm">
+      <span className="text-cyber-green-neon font-bold">V</span>
       <ReadableNumber
         format="compact"
-        className={cn(
-          "font-medium text-neutral-300",
-          isAboveThreshold && "text-yellow-200",
-        )}
+        className="font-bold text-cyber-green-neon"
         num={volume}
         prefix="$"
       />
-    </Metric>
+    </div>
   );
 };
 
@@ -210,17 +205,18 @@ export const TokenCardMcapMetric: React.FC<TokenCardMcapMetricProps> = ({
   const isAboveThreshold = useMemo(() => mcap && mcap >= 250_000, [mcap]);
 
   return (
-    <Metric label="MC" tooltip="Market Cap" className="text-sm">
+    <div className="flex items-center gap-1 text-sm">
+      <span className="text-cyber-green-neon font-bold">MC</span>
       <ReadableNumber
         format="compact"
         className={cn(
-          "font-medium text-neutral-300",
-          isAboveThreshold && "text-yellow-200",
+          "font-bold",
+          isAboveThreshold ? "text-yellow-400" : "text-cyber-green-neon"
         )}
         num={mcap}
         prefix="$"
       />
-    </Metric>
+    </div>
   );
 };
 
