@@ -2,7 +2,6 @@ import React from "react";
 import { ToggleGroup as ToggleGroupPrimitive } from "radix-ui";
 import { useExplore } from "@/contexts/ExploreProvider";
 import { ExploreTab } from "./types";
-import { PausedIndicator } from "./PausedIndicator";
 import { cn } from "@/lib/utils";
 
 export const ExploreTabTitleMap: Record<ExploreTab, string> = {
@@ -12,7 +11,7 @@ export const ExploreTabTitleMap: Record<ExploreTab, string> = {
 };
 
 export const MobileExploreTabs = () => {
-  const { mobileTab, setMobileTab, pausedTabs } = useExplore();
+  const { mobileTab, setMobileTab } = useExplore();
   return (
     <div className="sticky inset-x-0 top-0 z-20 border-b border-cyber-green-neon/30 shadow-md shadow-cyber-black lg:hidden cyber-bg">
       <div className="px-2 py-1">
@@ -28,19 +27,12 @@ export const MobileExploreTabs = () => {
         >
           <ToggleGroupItem value={ExploreTab.NEW}>
             {ExploreTabTitleMap[ExploreTab.NEW]}
-            {mobileTab === ExploreTab.NEW && pausedTabs[ExploreTab.NEW] && (
-              <PausedIndicator />
-            )}
           </ToggleGroupItem>
           <ToggleGroupItem value={ExploreTab.GRADUATING}>
             {ExploreTabTitleMap[ExploreTab.GRADUATING]}
-            {mobileTab === ExploreTab.GRADUATING &&
-              pausedTabs[ExploreTab.GRADUATING] && <PausedIndicator />}
           </ToggleGroupItem>
           <ToggleGroupItem value={ExploreTab.GRADUATED}>
             {ExploreTabTitleMap[ExploreTab.GRADUATED]}
-            {mobileTab === ExploreTab.GRADUATED &&
-              pausedTabs[ExploreTab.GRADUATED] && <PausedIndicator />}
           </ToggleGroupItem>
         </ToggleGroupPrimitive.Root>
       </div>
