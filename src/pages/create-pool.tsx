@@ -944,7 +944,7 @@ const handleConfirm = async () => {
                 </div>
               </div>
 
-              {/* Pool Parameters Section */}
+              {/* Pool Parameters Section 
               <div className="bg-white/5 rounded-xl p-8 backdrop-blur-sm border border-white/10">
                 <h2 className="text-2xl font-bold mb-4">Pool Parameters</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -959,6 +959,7 @@ const handleConfirm = async () => {
                   </button>
                 </div>
               </div>
+              */}
 
               {form.state.errors && form.state.errors.length > 0 && (
                 <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 space-y-2">
