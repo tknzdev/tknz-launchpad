@@ -23,7 +23,6 @@ import {
 } from "@/contexts/ExploreProvider";
 import { Pool } from "@/contexts/types";
 import { isHoverableDevice, useBreakpoint } from "@/lib/device";
-import { PausedIndicator } from "./PausedIndicator";
 
 type ExploreColumnProps = {
   tab: ExploreTab;
@@ -46,18 +45,15 @@ export const ExploreColumn: React.FC<ExploreColumnProps> = ({ tab }) => {
   return (
     <div className="flex flex-col h-full lg:h-[calc(100vh-300px)]">
       {/* Desktop Column Header */}
-      <div className="flex items-center justify-between p-3 max-lg:hidden border-b border-cyber-green-neon/20">
-        <div className="flex items-center gap-x-2">
-          <h2 className="font-bold text-cyber-green-neon cyber-text text-sm tracking-wider">
-            {ExploreTabTitleMap[tab]}
-          </h2>
-          {isPaused && <PausedIndicator />}
-        </div>
+      <div className="flex items-center justify-between p-4 max-lg:hidden border-b-2 border-cyber-green-neon bg-black shadow-[inset_0_0_20px_rgba(0,255,65,0.2)]">
+        <h2 className="font-black text-cyber-green-neon cyber-text text-lg tracking-[0.2em] uppercase text-shadow-neon">
+          {ExploreTabTitleMap[tab]}
+        </h2>
       </div>
 
       {/* List */}
-      <div className="relative flex-1 border-cyber-green-neon/20 text-xs lg:border-t h-full cyber-bg">
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-2 bg-gradient-to-b from-cyber-black to-transparent" />
+      <div className="relative flex-1 border-cyber-green-neon/50 text-xs lg:border-t-2 h-full bg-black/80">
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-4 bg-gradient-to-b from-black to-transparent" />
         <TokenCardListContainer
           tab={tab}
           request={request}
