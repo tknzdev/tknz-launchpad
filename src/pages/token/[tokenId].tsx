@@ -1,7 +1,7 @@
 import { TokenPageMsgHandler } from "@/components/Token/TokenPageMsgHandler";
 import { TokenDetails } from "@/components/TokenHeader/TokenDetail";
 import { TokenHeader } from "@/components/TokenHeader/TokenHeader";
-import { TokenStats } from "@/components/TokenHeader/TokenStats";
+// import { TokenStats } from "@/components/TokenHeader/TokenStats";
 import { TxnsTab } from "@/components/TokenTransactions";
 import { TxTable } from "@/components/TokenTransactions/TxTable";
 import Page from "@/components/ui/Page/Page";
@@ -72,7 +72,7 @@ export const TokenPageWithContext = () => {
           </div>
 
           <div className={"border-neutral-850 w-full max-sm:order-2"}>
-            <TokenStats key={`token-stats-${poolId}`} />
+            {/* <TokenStats key={`token-stats-${poolId}`} /> */}
 
             <div className="flex flex-col h-[300px] lg:h-[500px] w-full">
               <TokenChartProvider>
