@@ -94,8 +94,8 @@ export class TknzWalletAdapter extends BaseWalletAdapter<'Tknz Extension'> {
 
     this._connecting = true;
 
-    // Wait for the extension SDK to be injected into the page (max 2s)
-    const maxWaitMs = 2000;
+    // Wait for the extension SDK to be injected into the page (max 5s)
+    const maxWaitMs = 5000;
     const pollIntervalMs = 50;
     const startTime = Date.now();
     while (!(window as any).tknz && Date.now() - startTime < maxWaitMs) {
@@ -111,17 +111,24 @@ export class TknzWalletAdapter extends BaseWalletAdapter<'Tknz Extension'> {
       success: boolean;
       publicKey?: string;
     }>((resolve) => {
+      let timeoutId: number;
       const handler = (e: MessageEvent) => {
         if (e.data?.source === 'tknz' && e.data.type === 'CONNECT_RESPONSE') {
           window.removeEventListener('message', handler);
+          clearTimeout(timeoutId);
           resolve({ success: e.data.success, publicKey: e.data.publicKey });
         }
       };
-
       window.addEventListener('message', handler);
 
       // Trigger handshake via injected SDK.
       (window as any).tknz?.connect();
+
+      // Fallback timeout to ensure connect() always resolves
+      timeoutId = window.setTimeout(() => {
+        window.removeEventListener('message', handler);
+        resolve({ success: false });
+      }, 5000);
     });
 
     if (!success || !publicKey) {
