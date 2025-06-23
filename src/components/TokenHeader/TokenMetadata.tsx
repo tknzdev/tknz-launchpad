@@ -28,13 +28,13 @@ export const TokenMetadata: React.FC<{ className?: string }> = ({ className }) =
   return (
     <div className={cn("flex flex-col gap-2 p-2.5", styles.animateIn, className)}>
       <h2 className="text-sm font-semibold">Links</h2>
-      <div className="flex flex-col gap-1 text-sm text-neutral-500">
+      <div className="flex flex-col gap-1 text-sm text-neutral-700">
         {links.map(({ label, url }) => (
           <div key={url} className="flex items-center gap-1">
-            <span className="font-medium text-neutral-400">{label}:</span>
+            <span className="font-medium text-neutral-700">{label}:</span>
             <ExternalLink
               href={url}
-              className="underline hover:text-neutral-200"
+              className="underline hover:text-neutral-900"
             >
               {url}
             </ExternalLink>
