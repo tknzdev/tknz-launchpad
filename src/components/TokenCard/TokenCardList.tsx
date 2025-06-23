@@ -104,10 +104,10 @@ export const TokenCardList = memo(
           ) : !data || data.length === 0 ? (
             (emptyState ?? (
               <div className="col-span-full py-12 text-center">
-                <div className="text-neutral-500">
+              <div className="text-neutral-700">
                   No tokens matching this criteria
                 </div>
-                <div className="text-neutral-600">Adjust filters!</div>
+                <div className="text-neutral-700">Adjust filters!</div>
               </div>
             ))
           ) : (
