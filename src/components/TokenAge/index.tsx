@@ -19,11 +19,11 @@ export const TokenAge: React.FC<TokenAgeProps> = memo(
       date && date.getTime() > now.getTime() - RECENT_AGE_THRESHOLD;
 
     return (
-      <span
-        className={cn(
-          "min-w-[2ch] tabular-nums leading-none tracking-tight",
-          {
-            "text-neutral-500": date === undefined,
+    <span
+      className={cn(
+        "min-w-[2ch] tabular-nums leading-none tracking-tight",
+        {
+          "text-neutral-700": date === undefined,
             "text-primary": isRecent,
           },
           className,
