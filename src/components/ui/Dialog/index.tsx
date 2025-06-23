@@ -15,7 +15,7 @@ const DialogCloseButton = React.forwardRef<
   <DialogPrimitive.Close
     ref={ref}
     className={cn(
-      "flex items-center justify-center rounded-lg p-2 text-neutral-500 hover:bg-neutral-800 hover:text-neutral-200 focus:outline-primary",
+      "flex items-center justify-center rounded-lg p-2 text-neutral-700 hover:bg-neutral-800 hover:text-neutral-900 focus:outline-primary",
       className,
     )}
     {...props}
@@ -102,7 +102,7 @@ const DialogTitle = React.forwardRef<
   <DialogPrimitive.Title
     ref={ref}
     className={cn(
-      "text-base font-semibold leading-none tracking-tight text-neutral-200",
+      "text-base font-semibold leading-none tracking-tight text-neutral-900",
       className,
     )}
     {...props}
