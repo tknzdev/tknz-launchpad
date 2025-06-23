@@ -43,14 +43,14 @@ export const TokenCardTopHoldersMetric: React.FC<
 
   return (
     <Metric
-      label={<div className="mr-px text-neutral-500">T10</div>}
+      label={<div className="mr-px text-neutral-700">T10</div>}
       tooltip="Top 10 Holders"
     >
       <span
         className={cn(
           "opacity-80",
           topHoldersPercentage === undefined
-            ? "text-neutral-600"
+            ? "text-neutral-700"
             : isPass
               ? "text-emerald"
               : "text-rose",
@@ -86,7 +86,7 @@ export const TokenCardNetVolumeMetric: React.FC<
   return (
     <Metric
       label={
-        <div className="flex h-3.5 w-3.5 items-center justify-center rounded bg-neutral-800 text-center text-[8px] font-semibold leading-none text-neutral-500">
+        <div className="flex h-3.5 w-3.5 items-center justify-center rounded bg-neutral-800 text-center text-[8px] font-semibold leading-none text-neutral-700">
           NV
         </div>
       }
@@ -118,7 +118,7 @@ export const TokenCardNetBuyersMetric: React.FC<
   return (
     <Metric
       label={
-        <div className="flex h-3.5 w-3.5 items-center justify-center rounded bg-neutral-800 text-center text-[8px] font-semibold leading-none text-neutral-500">
+        <div className="flex h-3.5 w-3.5 items-center justify-center rounded bg-neutral-800 text-center text-[8px] font-semibold leading-none text-neutral-700">
           NB
         </div>
       }
@@ -158,7 +158,7 @@ export const TokenCardHoldersMetric: React.FC<TokenCardHoldersMetricProps> = ({
     >
       <ReadableNumber
         format="compact"
-        className="text-neutral-400"
+        className="text-neutral-700"
         num={holderCount}
         integer
       />
@@ -232,7 +232,7 @@ export const TokenCardLiquidityMetric: React.FC<
     <Metric label="L" tooltip="Liquidity">
       <ReadableNumber
         format="compact"
-        className="font-medium text-neutral-400"
+        className="font-medium text-neutral-700"
         num={liquidity}
         prefix="$"
       />
