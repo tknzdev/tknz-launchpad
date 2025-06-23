@@ -14,7 +14,7 @@ export const BondingCurve: React.FC<BondingCurveProps> = ({ className }) => {
 
   return (
     <div className={cn("flex flex-col gap-1", className)}>
-      <div className="flex items-center gap-2 text-xs text-neutral-500">
+      <div className="flex items-center gap-2 text-xs text-neutral-700">
         Bonding Curve:
         <span>
           {formatReadablePercentChange(bondingCurve / 100, {
@@ -42,7 +42,7 @@ export const MobileBondingCurve: React.FC<BondingCurveProps> = ({
 
   return (
     <div className={cn("flex flex-col gap-1 pt-2", className)}>
-      <div className="flex items-center gap-2 text-xs text-neutral-500">
+      <div className="flex items-center gap-2 text-xs text-neutral-700">
         Bonding Curve:
         <span>
           {formatReadablePercentChange(bondingCurve / 100, {
