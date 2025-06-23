@@ -138,7 +138,7 @@ export const columns: ColumnDef<Tx>[] = [
     header: () => <div className="text-right">{`Trader`}</div>,
     cell: ({ row, table }) => {
       return (
-        <div className="flex items-center justify-end gap-x-1.5 text-right text-neutral-400">
+        <div className="flex items-center justify-end gap-x-1.5 text-right text-neutral-700">
           <div className="flex items-center gap-x-1">
             {row.original.traderAddress ===
             table.options.meta?.walletAddress ? (
@@ -164,7 +164,7 @@ export const columns: ColumnDef<Tx>[] = [
     cell: ({ row }) => {
       return (
         <ExternalLink
-          className="text-neutral-400 max-sm:hidden"
+          className="text-neutral-700 max-sm:hidden"
           href={`https://solscan.io/tx/${row.original.txHash}`}
         >
           <ExternalIcon height={12} width={12} />
