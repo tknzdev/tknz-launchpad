@@ -207,7 +207,7 @@ export function getAuditScore(audit?: Audit) {
 
 export function getAuditScoreColorCn(score?: number) {
   if (score === undefined) {
-    return "text-neutral-500";
+    return "text-neutral-700";
   }
 
   if (score >= AUDIT_MAX_SCORE) {
@@ -218,7 +218,7 @@ export function getAuditScoreColorCn(score?: number) {
     return "text-amber";
   }
 
-  return "text-neutral-400";
+  return "text-neutral-700";
 }
 
 export function getOrganicScoreColorCn(label: "high" | "medium" | "low") {
@@ -226,7 +226,7 @@ export function getOrganicScoreColorCn(label: "high" | "medium" | "low") {
     return "text-emerald";
   }
 
-  return "text-neutral-400";
+  return "text-neutral-700";
 }
 
 export function formatAssetAsTokenInfo(asset: Asset) {
