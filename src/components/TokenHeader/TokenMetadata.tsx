@@ -36,7 +36,7 @@ export const TokenMetadata: React.FC<{ className?: string }> = ({ className }) =
               href={url}
               className="underline hover:text-neutral-900"
             >
-              {url}
+              {url.length > 20 ? url.slice(0, 20) + "..." : url}
             </ExternalLink>
           </div>
         ))}
