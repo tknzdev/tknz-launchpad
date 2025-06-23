@@ -61,7 +61,7 @@ const Description: React.FC<{ description: string }> = ({ description }) => {
     <div className="flex flex-col gap-1.5 text-sm">
       <div
         ref={contentRef}
-        className={cn("text-neutral-500 [overflow-wrap:anywhere]", {
+        className={cn("text-neutral-700 [overflow-wrap:anywhere]", {
           "line-clamp-3": !expanded,
           "whitespace-pre-wrap": expanded,
         })}
@@ -72,7 +72,7 @@ const Description: React.FC<{ description: string }> = ({ description }) => {
       {hasOverflow && (
         <button
           onClick={() => setExpanded(!expanded)}
-          className="self-start text-xs font-medium text-neutral-500 hover:text-primary"
+          className="self-start text-xs font-medium text-neutral-700 hover:text-primary"
         >
           {expanded ? "SHOW LESS" : "READ MORE"}
         </button>
