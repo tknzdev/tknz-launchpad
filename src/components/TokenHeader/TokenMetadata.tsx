@@ -20,7 +20,7 @@ export const TokenMetadata: React.FC<{ className?: string }> = ({ className }) =
     links.push({ label: "Telegram", url: baseAsset.telegram });
   }
   if (baseAsset.dev) {
-    links.push({ label: "Developedr", url: `https://solscan.io/account/${baseAsset.dev}` });
+    links.push({ label: "Developer", url: `https://solscan.io/account/${baseAsset.dev}` });
   }
   if (links.length === 0) {
     return null;
