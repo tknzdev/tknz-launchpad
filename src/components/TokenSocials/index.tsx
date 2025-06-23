@@ -28,7 +28,7 @@ export const TokenSocials: React.FC<TokenSocialsProps> = memo(
     return (
       <span
         className={cn(
-          "flex items-center gap-[5px] [--icon-color:theme(colors.neutral.400)]",
+          "flex items-center gap-[5px] [--icon-color:theme(colors.neutral.700)]",
           className,
         )}
         {...props}
