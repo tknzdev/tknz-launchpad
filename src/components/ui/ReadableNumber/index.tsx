@@ -12,10 +12,10 @@ import CaretUpIcon from "@/icons/CaretUpIcon";
 
 export const getNumberColorCn = (num?: number | null) => {
   if (num === undefined || num === null) {
-    return "text-neutral-600";
+    return "text-neutral-700";
   }
   return {
-    "text-neutral-500": num === 0,
+    "text-neutral-700": num === 0,
     "text-emerald": num > 0,
     "text-rose": num < 0,
   };
@@ -88,7 +88,7 @@ const BaseReadableNumber: React.FC<
         color
           ? getNumberColorCn(num)
           : num === undefined
-            ? "text-neutral-600"
+            ? "text-neutral-700"
             : "",
         className,
       )}
@@ -168,7 +168,7 @@ const AnimatedReadableNumber: React.FC<
         color
           ? getNumberColorCn(num)
           : num === undefined
-            ? "text-neutral-600"
+            ? "text-neutral-700"
             : "",
         isFlash && styles.flashBg,
         className,
