@@ -47,10 +47,16 @@ export class TknzWalletAdapter extends BaseWalletAdapter<'Tknz Extension'> {
   url = 'https://chrome.google.com/webstore/detail/tknz/eejballiemiamlndhkblapmlmjdgaaoi';
   icon = 'https://raw.githubusercontent.com/tknz/brand/main/icon-128.png';
 
-  /** Determines availability based on the presence of the injected SDK. */
+  /**
+   * Determines availability. We return Loadable when the SDK is not yet injected
+   * to allow connect() to poll and wait for the extension injection.
+   */
   get readyState(): WalletReadyState {
     if (typeof window === 'undefined') return WalletReadyState.Unsupported;
-    return (window as any).tknz ? WalletReadyState.Installed : WalletReadyState.NotDetected;
+    // If SDK is injected, treat as Installed; otherwise Loadable to enable polling in connect()
+    return (window as any).tknz
+      ? WalletReadyState.Installed
+      : WalletReadyState.Loadable;
   }
 
   // -------------------------------------------------------------------------
