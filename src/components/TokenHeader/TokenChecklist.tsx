@@ -55,7 +55,7 @@ const ChecklistAuthority: React.FC = () => {
     <div className="flex justify-between gap-1">
       <HoverPopover root={true}>
         <HoverPopoverTrigger>
-          <div className="truncate text-sm text-neutral-500 underline decoration-neutral-700 decoration-dashed underline-offset-4 group-hover:decoration-neutral-200">
+          <div className="truncate text-sm text-neutral-700 underline decoration-neutral-700 decoration-dashed underline-offset-4 group-hover:decoration-neutral-900">
             Mint / Freeze
           </div>
         </HoverPopoverTrigger>
@@ -101,7 +101,7 @@ const ChecklistTopHolders: React.FC = () => {
     <div className="flex justify-between gap-1">
       <HoverPopover root={true}>
         <HoverPopoverTrigger>
-          <div className="truncate text-sm text-neutral-500 underline decoration-neutral-700 decoration-dashed underline-offset-4 group-hover:decoration-neutral-200">
+          <div className="truncate text-sm text-neutral-700 underline decoration-neutral-700 decoration-dashed underline-offset-4 group-hover:decoration-neutral-900">
             {`Top 10 Holders`}
           </div>
         </HoverPopoverTrigger>
@@ -118,7 +118,7 @@ const ChecklistTopHolders: React.FC = () => {
         className={cn(
           "inline-flex items-center text-sm",
           audit?.topHoldersPercentage === undefined
-            ? "text-neutral-500"
+            ? "text-neutral-700"
             : isAuditTopHoldersPass(audit)
               ? "text-emerald"
               : "text-rose",
@@ -142,7 +142,7 @@ export const AuditTooltipInfo: React.FC<{
 }> = ({ approved, label, description }) => {
   return (
     <div
-      className={cn("group space-y-1 text-neutral-200", {
+      className={cn("group space-y-1 text-neutral-900", {
         "opacity-40": !approved,
       })}
     >
