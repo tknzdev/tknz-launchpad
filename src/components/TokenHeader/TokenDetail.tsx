@@ -4,6 +4,7 @@ import { BondingCurve } from "./BondingCurve";
 
 import { TokenMetrics } from "./TokenMetrics";
 import { Checklist } from "./TokenChecklist";
+import { TokenMetadata } from "./TokenMetadata";
 
 export const TokenDetails: React.FC = () => {
   const tokenId = useTokenAddress();
@@ -15,6 +16,7 @@ export const TokenDetails: React.FC = () => {
 
       <div className="flex flex-col divide-y divide-neutral-850 border-neutral-850">
         <TokenDescription />
+        <TokenMetadata />
         <Checklist />
       </div>
     </div>
