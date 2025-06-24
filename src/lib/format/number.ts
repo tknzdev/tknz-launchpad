@@ -28,8 +28,8 @@ function getNumberSmallFormatter(decimals: number): Intl.NumberFormat {
 
   const formatter = new Intl.NumberFormat(undefined, {
     minimumSignificantDigits: 3,
-    maximumSignificantDigits: decimals,
-    maximumFractionDigits: decimals,
+    maximumSignificantDigits: Math.max(3, Math.min(21, decimals)), // Ensure it's within valid range (1-21)
+    maximumFractionDigits: Math.min(20, decimals), // Ensure it's within valid range (0-20)
     roundingMode: "trunc",
   });
   intlNumberSmallFormatters[decimals] = formatter;
@@ -316,4 +316,11 @@ function countInsignificantFractionalZeroes(value: number | string): number {
 
 function isValidNumber(num: number): boolean {
   return num !== Infinity && !isNaN(num);
+}
+
+/**
+ * Simple wrapper for formatReadableNumber with common defaults
+ */
+export function formatNumber(num?: number | null): string {
+  return formatReadableNumber(num, { decimals: 2 });
 }
