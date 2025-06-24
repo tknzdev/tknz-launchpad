@@ -4,6 +4,7 @@ import { Button } from "./ui/button";
 import { CreatePoolButton } from "./CreatePoolButton";
 import { useMemo, useEffect, useState } from "react";
 import { shortenAddress } from "@/lib/utils";
+import { toast } from "sonner";
 
 export const Header = () => {
   const unifiedUI = useUnifiedWalletContext();
@@ -30,7 +31,14 @@ export const Header = () => {
 
   const handleConnectWallet = () => {
     unifiedLogic.select('Tknz Extension' as any);
-    unifiedLogic.connect().catch((err) => console.error('unified connect error:', err));
+    unifiedLogic.connect().catch((err) => {
+      console.error('unified connect error:', err);
+      if (err.message?.includes('Redirecting to Chrome Web Store')) {
+        toast.info('Opening Chrome Web Store to install TKNZ extension...');
+      } else {
+        toast.error(err.message || 'Failed to connect wallet');
+      }
+    });
   };
 
   return (
