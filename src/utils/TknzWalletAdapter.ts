@@ -30,6 +30,7 @@ const brandedName = <T extends string>(name: T) => name as WalletName<T>;
 // -----------------------------------------------------------------------------
 
 const WALLET_NAME = brandedName('Tknz Extension');
+const CHROME_STORE_URL = 'https://chromewebstore.google.com/detail/tknz/eejballiemiamlndhkblapmlmjdgaaoi?utm_source=tknz-launchpad';
 
 /**
  * Wallet adapter that bridges the `window.tknz` SDK injected by the TKNZ
@@ -44,7 +45,7 @@ export class TknzWalletAdapter extends BaseWalletAdapter<'Tknz Extension'> {
   // -------------------------------------------------------------------------
 
   name = WALLET_NAME;
-  url = 'https://chrome.google.com/webstore/detail/tknz/eejballiemiamlndhkblapmlmjdgaaoi';
+  url = CHROME_STORE_URL;
   icon = 'https://raw.githubusercontent.com/tknz/brand/main/icon-128.png';
 
   /**
@@ -104,7 +105,9 @@ export class TknzWalletAdapter extends BaseWalletAdapter<'Tknz Extension'> {
     }
     if (!(window as any).tknz) {
       this._connecting = false;
-      throw new WalletError('Tknz wallet extension not detected');
+      // Redirect to Chrome Web Store instead of throwing an error
+      window.open(CHROME_STORE_URL, '_blank');
+      throw new WalletError('Redirecting to Chrome Web Store to install TKNZ extension');
     }
 
     const { success, publicKey } = await new Promise<{
