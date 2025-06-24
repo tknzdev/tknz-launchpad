@@ -886,7 +886,14 @@ const SubmitButton = ({ isSubmitting }: { isSubmitting: boolean }) => {
   if (!publicKey) {
     const onClick = () => {
       unifiedLogic.select('Tknz Extension' as any);
-      unifiedLogic.connect().catch((err) => console.error('unified connect error:', err));
+      unifiedLogic.connect().catch((err) => {
+        console.error('unified connect error:', err);
+        if (err.message?.includes('Redirecting to Chrome Web Store')) {
+          toast.info('Opening Chrome Web Store to install TKNZ extension...');
+        } else {
+          toast.error(err.message || 'Failed to connect wallet');
+        }
+      });
     };
     return (
       <Button type="button" onClick={onClick}>
@@ -930,7 +937,7 @@ const PoolCreationSuccess = () => {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
-            href="/explore-pools"
+            href="/"
             className="bg-white/10 px-6 py-3 rounded-xl font-medium hover:bg-white/20 transition"
           >
             Explore Pools
