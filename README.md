@@ -19,14 +19,10 @@ pnpm install
 
 3. Set up environment variables
 
-```bash
-cp .env.example .env
-```
-
-4. Edit the `.env` file with your own values
+You can set environment variables in a `.env.local` file at the project root or in your hosting platform settings.
 
 ```env
-# .env
+# .env.local (local development)
 # Cloudflare R2 Storage
 R2_ACCESS_KEY_ID=your_r2_access_key_id
 R2_SECRET_ACCESS_KEY=your_r2_secret_access_key
@@ -38,6 +34,12 @@ RPC_URL=your_rpc_url
 
 # Pool Configuration
 POOL_CONFIG_KEY=your_pool_config_key
+
+# Platform Stats API
+# URL to the Netlify functions endpoint for platform stats (from tknz-site)
+NEXT_PUBLIC_PLATFORM_STATS_URL=https://your-site-domain.netlify.app/.netlify/functions
+# (Optional) Fallback marketplace API endpoint
+NEXT_PUBLIC_MARKETPLACE_URL=https://your-site-domain.netlify.app/.netlify/functions
 ```
 
 ### Getting R2 Credentials
