@@ -1,11 +1,24 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { formatNumber } from "@/lib/format/number";
 
 const HeroSection = () => {
   const router = useRouter();
   const [glitchText, setGlitchText] = useState("LAUNCH");
   const glitchWords = ["LAUNCH", "CREATE", "TRADE", "MOON", "PROFIT"];
+  
+  // Fetch platform statistics
+  const { data: statsData } = useQuery({
+    queryKey: ["platform-stats-hero"],
+    queryFn: async () => {
+      const res = await fetch("https://tknz.fun/.netlify/functions/platform-stats");
+      if (!res.ok) throw new Error("Failed to fetch platform stats");
+      return res.json();
+    },
+    refetchInterval: 60000, // Refresh every minute
+  });
   
   useEffect(() => {
     const interval = setInterval(() => {
@@ -73,9 +86,18 @@ const HeroSection = () => {
 
         {/* Quick stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-2xl mx-auto">
-          <QuickStat label="Total Volume" value="$12.5M" />
-          <QuickStat label="Tokens Launched" value="1,337" />
-          <QuickStat label="Active Traders" value="42,069" />
+          <QuickStat 
+            label="Total Volume" 
+            value={statsData ? `$${formatNumber(statsData.totalVolumeUSD)}` : "..."} 
+          />
+          <QuickStat 
+            label="Tokens Launched" 
+            value={statsData ? statsData.totalTokensLaunched.toLocaleString() : "..."} 
+          />
+          <QuickStat 
+            label="Active Traders" 
+            value={statsData ? statsData.activeUsers24h.toLocaleString() : "..."} 
+          />
         </div>
       </div>
 
