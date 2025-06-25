@@ -29,7 +29,7 @@ const Page: React.FC<React.PropsWithChildren<IProps>> = ({
         <div className="absolute inset-0 bg-cyber-grid bg-grid opacity-20 pointer-events-none" />
 
         {/* Scanning line effect */}
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyber-green-neon to-transparent animate-scan opacity-60" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyber-green-neon to-transparent animate-scan opacity-60 hidden md:block" />
 
         <div className="lg:max-w-7xl w-full relative z-10">{children}</div>
       </div>
