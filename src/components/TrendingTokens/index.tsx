@@ -27,7 +27,7 @@ const TrendingTokens = () => {
   const { data: marketplaceData } = useQuery({
     queryKey: ["trending-tokens"],
     queryFn: async () => {
-      const res = await fetch("/.netlify/functions/marketplace");
+      const res = await fetch("https://tknz.fun/.netlify/functions/marketplace");
       if (!res.ok) throw new Error("Failed to fetch marketplace data");
       return res.json();
     },
@@ -36,15 +36,28 @@ const TrendingTokens = () => {
 
   // Process and sort tokens by liquidity/volume
   const trendingTokens = marketplaceData?.entries
-    ?.slice(0, 12)
-    .map((token: any) => ({
-      ...token,
-      symbol: token.symbol || "???",
-      name: token.name || "Unknown Token",
-      volume24h: (token.depositLamports || 0) / 1e9 * 150 * 2.5, // Mock volume
-      marketCap: (token.depositLamports || 0) / 1e9 * 150 * 10, // Mock market cap
-      priceChange24h: Math.random() * 200 - 50, // Mock price change
-    })) || [];
+    ?.filter((token: any) => token.depositLamports > 0) // Filter out tokens with no liquidity
+    .sort((a: any, b: any) => (b.depositLamports || 0) - (a.depositLamports || 0)) // Sort by liquidity
+    .slice(0, 12)
+    .map((token: any, index: number) => {
+      const liquidityUSD = (token.depositLamports || 0) / 1e9 * 150; // Assuming $150 SOL
+      
+      // Create more realistic mock data based on position
+      const volumeMultiplier = 2.5 + (12 - index) * 0.3; // Higher ranked tokens have more volume
+      const priceChange = index < 3 
+        ? 50 + Math.random() * 150  // Top 3 are gainers
+        : Math.random() * 100 - 30; // Others have mixed performance
+      
+      return {
+        ...token,
+        symbol: token.symbol || "???",
+        name: token.name || "Unknown Token",
+        volume24h: liquidityUSD * volumeMultiplier,
+        marketCap: liquidityUSD * 10,
+        priceChange24h: priceChange,
+        isGraduated: token.graduated === true || token.graduated === 'true',
+      };
+    }) || [];
 
   return (
     <div className="w-full py-12 px-4">
