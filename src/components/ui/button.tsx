@@ -10,7 +10,7 @@ export interface ButtonProps
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, children, variant = "default", ...props }, ref) => {
     const baseClasses =
-      "px-4 md:px-6 py-2 md:py-3 rounded-none font-semibold text-xs md:text-sm uppercase tracking-wider transition-all duration-300 relative overflow-hidden cyber-mono";
+      "px-3 sm:px-4 md:px-6 py-2 md:py-3 rounded-none font-semibold text-xs md:text-sm uppercase tracking-wider transition-all duration-300 relative overflow-hidden cyber-mono";
 
     const variantClasses = {
       default:
