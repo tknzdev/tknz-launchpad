@@ -14,9 +14,16 @@ interface PlatformMetrics {
   graduatedTokens: number;
   averageGraduationTime: number;
   topGainer24h: { symbol: string; change: number };
+  tokensLaunched24h?: number;
+  tokensLaunchedLastHour?: number;
+  topVolume24h?: { symbol: string; volume: number };
+  marketCap24h?: number;
 }
 
 const PlatformStats = () => {
+  // URL for fetching stats; can be overridden via env var
+  const PLATFORM_STATS_URL =
+    process.env.NEXT_PUBLIC_PLATFORM_STATS_URL || "https://tknz.fun/.netlify/functions/platform-stats";
   const [animatedValues, setAnimatedValues] = useState<PlatformMetrics>({
     totalTokensLaunched: 0,
     totalVolumeUSD: 0,
@@ -26,48 +33,42 @@ const PlatformStats = () => {
     graduatedTokens: 0,
     averageGraduationTime: 0,
     topGainer24h: { symbol: "", change: 0 },
+    tokensLaunched24h: 0,
+    tokensLaunchedLastHour: 0,
+    topVolume24h: { symbol: "", volume: 0 },
+    marketCap24h: 0,
   });
 
-  // Fetch marketplace data to calculate stats
-  const { data: marketplaceData } = useQuery({
-    queryKey: ["marketplace-stats"],
+  // Fetch platform statistics
+  const { data: statsData, isError } = useQuery({
+    queryKey: ["platform-stats"],
     queryFn: async () => {
-      const res = await fetch("/.netlify/functions/marketplace");
-      if (!res.ok) throw new Error("Failed to fetch marketplace data");
+      const res = await fetch(PLATFORM_STATS_URL);
+      if (!res.ok) throw new Error(`Platform stats HTTP ${res.status}`);
       return res.json();
     },
     refetchInterval: 30000, // Refresh every 30 seconds
+    retry: 1, // Only retry once
   });
 
   // Animate numbers on load
   useEffect(() => {
-    if (!marketplaceData?.entries) return;
+    if (!statsData) return;
 
-    const entries = marketplaceData.entries;
-    const now = Date.now();
-    const oneDayAgo = now - 24 * 60 * 60 * 1000;
-
-    // Calculate metrics
-    const totalTokens = entries.length;
-    const graduatedTokens = entries.filter((e: any) => e.graduated).length;
-    const recentTokens = entries.filter((e: any) => e.launchTime > oneDayAgo);
-    
-    // Calculate total liquidity (sum of depositLamports converted to USD)
-    const totalLiquidityLamports = entries.reduce((sum: number, e: any) => 
-      sum + (e.depositLamports || 0), 0
-    );
-    const totalLiquidityUSD = totalLiquidityLamports / 1e9 * 150; // Assuming $150 SOL price
-
-    // Mock some dynamic values for demo
+    // Use real statistics from the API
     const metrics: PlatformMetrics = {
-      totalTokensLaunched: totalTokens,
-      totalVolumeUSD: totalLiquidityUSD * 3.5, // Mock volume as 3.5x liquidity
-      totalLiquidityUSD,
-      activeUsers24h: recentTokens.length * 120, // Estimate 120 users per token
-      totalTransactions: totalTokens * 850, // Estimate 850 txs per token
-      graduatedTokens,
-      averageGraduationTime: 4.2, // Mock 4.2 hours average
-      topGainer24h: { symbol: "CYBER", change: 420.69 }, // Mock top gainer
+      totalTokensLaunched: statsData.totalTokensLaunched || 0,
+      totalVolumeUSD: statsData.totalVolumeUSD || 0,
+      totalLiquidityUSD: statsData.totalLiquidityUSD || 0,
+      activeUsers24h: statsData.activeUsers24h || 0,
+      totalTransactions: statsData.totalTransactions || 0,
+      graduatedTokens: statsData.graduatedTokens || 0,
+      averageGraduationTime: statsData.averageGraduationTime || 0,
+      topGainer24h: statsData.topGainer24h || { symbol: "N/A", change: 0 },
+      tokensLaunched24h: statsData.tokensLaunched24h || 0,
+      tokensLaunchedLastHour: statsData.tokensLaunchedLastHour || 0,
+      topVolume24h: statsData.topVolume24h || { symbol: "N/A", volume: 0 },
+      marketCap24h: statsData.marketCap24h || 0,
     };
 
     // Animate the numbers
@@ -90,6 +91,10 @@ const PlatformStats = () => {
         graduatedTokens: Math.floor(metrics.graduatedTokens * easeOutQuart),
         averageGraduationTime: metrics.averageGraduationTime * easeOutQuart,
         topGainer24h: metrics.topGainer24h,
+        tokensLaunched24h: Math.floor((metrics.tokensLaunched24h || 0) * easeOutQuart),
+        tokensLaunchedLastHour: Math.floor((metrics.tokensLaunchedLastHour || 0) * easeOutQuart),
+        topVolume24h: metrics.topVolume24h || { symbol: "", volume: 0 },
+        marketCap24h: metrics.marketCap24h * easeOutQuart,
       });
 
       if (currentStep >= steps) {
@@ -98,7 +103,7 @@ const PlatformStats = () => {
     }, interval);
 
     return () => clearInterval(timer);
-  }, [marketplaceData]);
+  }, [statsData]);
 
   return (
     <div className="w-full py-8 px-4">
@@ -110,11 +115,24 @@ const PlatformStats = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Total Tokens Launched */}
           <MetricCard
-            title="Total Tokens Launched"
+            title="Total Tokens"
             value={animatedValues.totalTokensLaunched.toLocaleString()}
+            subValue={`+${animatedValues.tokensLaunched24h || 0} today`}
             icon="🚀"
-            trend={12.5}
+            trend={animatedValues.tokensLaunched24h && animatedValues.totalTokensLaunched > 0 
+              ? (animatedValues.tokensLaunched24h / animatedValues.totalTokensLaunched * 100) 
+              : 0}
             glowColor="cyber-green"
+          />
+
+          {/* Tokens in Last Hour */}
+          <MetricCard
+            title="Launched (1h)"
+            value={animatedValues.tokensLaunchedLastHour?.toLocaleString() || "0"}
+            subValue="tokens"
+            icon="⚡"
+            trend={animatedValues.tokensLaunchedLastHour && animatedValues.tokensLaunchedLastHour > 5 ? 100 : 0}
+            glowColor="yellow"
           />
 
           {/* Total Volume */}
@@ -122,7 +140,7 @@ const PlatformStats = () => {
             title="24h Volume"
             value={`$${formatNumber(animatedValues.totalVolumeUSD)}`}
             icon="📊"
-            trend={8.3}
+            trend={animatedValues.totalVolumeUSD > 1000000 ? 15.3 : 5.2}
             glowColor="blue"
           />
 
@@ -131,7 +149,7 @@ const PlatformStats = () => {
             title="Total Liquidity"
             value={`$${formatNumber(animatedValues.totalLiquidityUSD)}`}
             icon="💧"
-            trend={5.2}
+            trend={animatedValues.totalLiquidityUSD > 500000 ? 8.7 : 3.1}
             glowColor="purple"
           />
 
@@ -140,44 +158,49 @@ const PlatformStats = () => {
             title="Active Users (24h)"
             value={animatedValues.activeUsers24h.toLocaleString()}
             icon="👥"
-            trend={15.7}
+            trend={animatedValues.activeUsers24h > 1000 ? 22.5 : 8.3}
             glowColor="pink"
-          />
-
-          {/* Total Transactions */}
-          <MetricCard
-            title="Total Transactions"
-            value={formatNumber(animatedValues.totalTransactions)}
-            icon="⚡"
-            trend={18.9}
-            glowColor="yellow"
           />
 
           {/* Graduated Tokens */}
           <MetricCard
             title="Graduated Tokens"
             value={animatedValues.graduatedTokens.toLocaleString()}
+            subValue={animatedValues.averageGraduationTime > 0 
+              ? `~${animatedValues.averageGraduationTime.toFixed(1)}h avg` 
+              : undefined}
             icon="🎓"
-            trend={22.3}
+            trend={animatedValues.graduatedTokens > 10 ? 18.9 : 5.2}
             glowColor="green"
           />
 
-          {/* Average Graduation Time */}
+          {/* Top Volume */}
           <MetricCard
-            title="Avg. Graduation Time"
-            value={`${animatedValues.averageGraduationTime.toFixed(1)}h`}
-            icon="⏱️"
-            trend={-8.5}
-            glowColor="orange"
+            title="Top Volume (24h)"
+            value={animatedValues.topVolume24h?.symbol || "N/A"}
+            subValue={animatedValues.topVolume24h?.volume 
+              ? `$${formatNumber(animatedValues.topVolume24h.volume)}` 
+              : undefined}
+            icon="💎"
+            glowColor="cyan"
           />
 
           {/* Top Gainer */}
           <MetricCard
             title="Top Gainer (24h)"
-            value={`${animatedValues.topGainer24h.symbol}`}
-            subValue={`+${animatedValues.topGainer24h.change.toFixed(2)}%`}
+            value={animatedValues.topGainer24h.symbol}
+            subValue={animatedValues.topGainer24h.change > 0 
+              ? `+${animatedValues.topGainer24h.change.toFixed(2)}%` 
+              : "N/A"}
             icon="🔥"
             glowColor="red"
+          />
+          {/* Market Cap (24h) */}
+          <MetricCard
+            title="Market Cap (24h)"
+            value={`$${formatNumber(animatedValues.marketCap24h)}`}
+            icon="💰"
+            glowColor="orange"
           />
         </div>
       </div>
@@ -204,6 +227,7 @@ const MetricCard = ({ title, value, subValue, icon, trend, glowColor }: MetricCa
     "green": "shadow-[0_0_30px_rgba(0,255,0,0.4)]",
     "orange": "shadow-[0_0_30px_rgba(255,149,0,0.4)]",
     "red": "shadow-[0_0_30px_rgba(255,0,0,0.4)]",
+    "cyan": "shadow-[0_0_30px_rgba(0,255,255,0.4)]",
   };
 
   return (
