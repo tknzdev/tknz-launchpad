@@ -471,10 +471,10 @@ const handleConfirm = async () => {
   return (
     <>
       <Head>
-        <title>Create Pool - Virtual Curve</title>
+        <title>Create Token - Tknz.fun</title>
         <meta
           name="description"
-          content="Create a new token pool on Virtual Curve with customizable price curves."
+          content="Create a new token on Tknz.fun with customizable price curves."
         />
       </Head>
 
@@ -492,9 +492,9 @@ const handleConfirm = async () => {
           />
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10">
             <div>
-              <h1 className="text-4xl font-bold mb-2">Create Pool</h1>
+              <h1 className="text-4xl font-bold mb-2">Create Token</h1>
               <p className="text-gray-300">
-                Launch your token with a customizable price curve
+                Launch your token with a pre-selected price curve.
               </p>
             </div>
           </div>
