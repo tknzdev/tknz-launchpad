@@ -10,17 +10,29 @@ export const TokenMetadata: React.FC<{ className?: string }> = ({ className }) =
     return null;
   }
   const links: Array<{ label: string; url: string }> = [];
-  if (baseAsset.website) {
-    links.push({ label: "Website", url: baseAsset.website });
+  // Known links: prefer extensions over root fields
+  const websiteUrl = baseAsset.extensions?.website || baseAsset.website;
+  if (websiteUrl) {
+    links.push({ label: "Website", url: websiteUrl });
   }
-  if (baseAsset.twitter) {
-    links.push({ label: "Twitter", url: baseAsset.twitter });
+  const twitterUrl = baseAsset.extensions?.twitter || baseAsset.twitter;
+  if (twitterUrl) {
+    links.push({ label: "Twitter", url: twitterUrl });
   }
-  if (baseAsset.telegram) {
-    links.push({ label: "Telegram", url: baseAsset.telegram });
+  const telegramUrl = baseAsset.extensions?.telegram || baseAsset.telegram;
+  if (telegramUrl) {
+    links.push({ label: "Telegram", url: telegramUrl });
   }
   if (baseAsset.dev) {
     links.push({ label: "Developer", url: `https://solscan.io/account/${baseAsset.dev}` });
+  }
+  // Add any additional extension links dynamically
+  if (baseAsset.extensions) {
+    Object.entries(baseAsset.extensions).forEach(([key, url]) => {
+      if (!url || ["website", "twitter", "telegram"].includes(key)) return;
+      const label = key.charAt(0).toUpperCase() + key.slice(1);
+      links.push({ label, url });
+    });
   }
   if (links.length === 0) {
     return null;
