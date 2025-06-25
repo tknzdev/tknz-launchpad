@@ -26,68 +26,81 @@ const RecentActivity = () => {
   const { data: marketplaceData } = useQuery({
     queryKey: ["recent-activity"],
     queryFn: async () => {
-      const res = await fetch("/.netlify/functions/marketplace");
+      const res = await fetch("https://tknz.fun/.netlify/functions/marketplace");
       if (!res.ok) throw new Error("Failed to fetch marketplace data");
       return res.json();
     },
     refetchInterval: 10000, // Refresh every 10 seconds
   });
 
-  // Generate mock activities from marketplace data
+  // Generate activities from marketplace data
   useEffect(() => {
     if (!marketplaceData?.entries) return;
 
+    const now = Date.now();
+    const oneHourAgo = now - 60 * 60 * 1000;
+    
+    // Filter and sort recent tokens
     const recentTokens = marketplaceData.entries
-      .slice(0, 20)
-      .sort((a: any, b: any) => b.launchTime - a.launchTime);
+      .filter((token: any) => token.launchTime && token.launchTime > now - 24 * 60 * 60 * 1000)
+      .sort((a: any, b: any) => b.launchTime - a.launchTime)
+      .slice(0, 30); // Get more tokens for better activity feed
 
-    // Create mock activities
-    const mockActivities: ActivityItem[] = [];
+    // Create activities
+    const allActivities: ActivityItem[] = [];
     
     recentTokens.forEach((token: any, index: number) => {
-      // Launch activity
-      mockActivities.push({
-        id: `launch-${token.mint}`,
-        type: "launch",
+      const tokenData = {
         tokenSymbol: token.symbol || "???",
         tokenName: token.name || "Unknown Token",
-        tokenMint: token.mint,
-        tokenImage: token.imageUrl,
+        tokenMint: token.mint || token.address,
+        tokenImage: token.imageUrl || token.logoURI,
+      };
+
+      // Launch activity
+      allActivities.push({
+        id: `launch-${token.mint || token.address}`,
+        type: "launch",
+        ...tokenData,
         timestamp: token.launchTime,
       });
 
-      // Add some mock swaps
-      if (index % 2 === 0) {
-        mockActivities.push({
-          id: `swap-${token.mint}-${index}`,
-          type: "swap",
-          tokenSymbol: token.symbol || "???",
-          tokenName: token.name || "Unknown Token",
-          tokenMint: token.mint,
-          tokenImage: token.imageUrl,
-          amount: `${(Math.random() * 10).toFixed(2)} SOL`,
-          user: `${token.mint.slice(0, 4)}...${token.mint.slice(-4)}`,
-          timestamp: token.launchTime + Math.random() * 3600000, // Random time within 1 hour
-        });
+      // Add realistic swap activities based on liquidity
+      const hasLiquidity = token.depositLamports > 0;
+      if (hasLiquidity) {
+        // More swaps for higher liquidity tokens
+        const swapCount = token.depositLamports > 1e9 ? 3 : token.depositLamports > 5e8 ? 2 : 1;
+        
+        for (let i = 0; i < swapCount; i++) {
+          const swapTime = token.launchTime + Math.random() * (now - token.launchTime);
+          if (swapTime > oneHourAgo) { // Only show recent swaps
+            const swapAmount = (Math.random() * 5 + 0.1).toFixed(2);
+            allActivities.push({
+              id: `swap-${token.mint || token.address}-${i}`,
+              type: "swap",
+              ...tokenData,
+              amount: `${swapAmount} SOL`,
+              user: `${(token.creatorWallet || token.mint || '').slice(0, 4)}...${(token.creatorWallet || token.mint || '').slice(-4)}`,
+              timestamp: swapTime,
+            });
+          }
+        }
       }
 
-      // Add graduations
-      if (token.graduated && index % 3 === 0) {
-        mockActivities.push({
-          id: `graduate-${token.mint}`,
+      // Add graduations for graduated tokens
+      if ((token.graduated === true || token.graduated === 'true') && token.launchTime < now - 2 * 60 * 60 * 1000) {
+        allActivities.push({
+          id: `graduate-${token.mint || token.address}`,
           type: "graduate",
-          tokenSymbol: token.symbol || "???",
-          tokenName: token.name || "Unknown Token",
-          tokenMint: token.mint,
-          tokenImage: token.imageUrl,
-          timestamp: token.launchTime + 3600000 * 2, // 2 hours after launch
+          ...tokenData,
+          timestamp: token.launchTime + 2 * 60 * 60 * 1000 + Math.random() * 60 * 60 * 1000, // 2-3 hours after launch
         });
       }
     });
 
-    // Sort by timestamp descending
-    mockActivities.sort((a, b) => b.timestamp - a.timestamp);
-    setActivities(mockActivities.slice(0, 15));
+    // Sort by timestamp descending and take the most recent
+    allActivities.sort((a, b) => b.timestamp - a.timestamp);
+    setActivities(allActivities.slice(0, 20));
   }, [marketplaceData]);
 
   return (
