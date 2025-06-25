@@ -23,41 +23,41 @@ interface TrendingToken {
 const TrendingTokens = () => {
   const router = useRouter();
 
-  // Fetch marketplace data
-  const { data: marketplaceData } = useQuery({
-    queryKey: ["trending-tokens"],
+  // Fetch trending pools via Jupiter Gems API
+  const { data: gemsData } = useQuery({
+    queryKey: ['trending-tokens'],
     queryFn: async () => {
-      const res = await fetch("https://tknz.fun/.netlify/functions/marketplace");
-      if (!res.ok) throw new Error("Failed to fetch marketplace data");
+      const res = await fetch('https://tknz.fun/.netlify/functions/gems-tokens', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recent: { timeframe: '24h' } }),
+      });
+      if (!res.ok) throw new Error(`Gems tokens HTTP ${res.status}`);
       return res.json();
     },
     refetchInterval: 30000,
   });
 
+  if (!gemsData?.recent?.pools || gemsData.recent.pools.length === 0) {
+    return null;
+  }
   // Process and sort tokens by liquidity/volume
-  const trendingTokens = marketplaceData?.entries
-    ?.filter((token: any) => token.depositLamports > 0) // Filter out tokens with no liquidity
-    .sort((a: any, b: any) => (b.depositLamports || 0) - (a.depositLamports || 0)) // Sort by liquidity
+  const trendingTokens = (gemsData?.recent?.pools || [])
     .slice(0, 12)
-    .map((token: any, index: number) => {
-      const liquidityUSD = (token.depositLamports || 0) / 1e9 * 150; // Assuming $150 SOL
-      
-      // Create more realistic mock data based on position
-      const volumeMultiplier = 2.5 + (12 - index) * 0.3; // Higher ranked tokens have more volume
-      const priceChange = index < 3 
-        ? 50 + Math.random() * 150  // Top 3 are gainers
-        : Math.random() * 100 - 30; // Others have mixed performance
-      
+    .map((p: any) => {
+      const asset = p.baseAsset;
       return {
-        ...token,
-        symbol: token.symbol || "???",
-        name: token.name || "Unknown Token",
-        volume24h: liquidityUSD * volumeMultiplier,
-        marketCap: liquidityUSD * 10,
-        priceChange24h: priceChange,
-        isGraduated: token.graduated === true || token.graduated === 'true',
-      };
-    }) || [];
+        mint: asset.id,
+        symbol: asset.symbol,
+        name: asset.name,
+        imageUrl: asset.icon,
+        depositLamports: 0,
+        launchTime: new Date(p.createdAt).getTime(),
+        priceChange24h: asset.stats24h?.priceChange || 0,
+        volume24h: (asset.stats24h?.buyVolume || 0) + (asset.stats24h?.sellVolume || 0),
+        marketCap: asset.mcap || 0,
+        isGraduated: false,
+      } as TrendingToken;
+    });
 
   return (
     <div className="w-full py-12 px-4">
