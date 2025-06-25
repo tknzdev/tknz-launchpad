@@ -60,7 +60,8 @@ const PlatformStats = () => {
       totalTokensLaunched: statsData.totalTokensLaunched || 0,
       totalVolumeUSD: statsData.totalVolumeUSD || 0,
       totalLiquidityUSD: statsData.totalLiquidityUSD || 0,
-      activeUsers24h: statsData.activeUsers24h || 0,
+      // Use tokens launched in the last 24h as Active Users count
+      activeUsers24h: statsData.tokensLaunched24h || 0,
       totalTransactions: statsData.totalTransactions || 0,
       graduatedTokens: statsData.graduatedTokens || 0,
       averageGraduationTime: statsData.averageGraduationTime || 0,
