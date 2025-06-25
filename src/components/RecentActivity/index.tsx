@@ -50,11 +50,12 @@ const RecentActivity = () => {
     const allActivities: ActivityItem[] = [];
     
     recentTokens.forEach((token: any, index: number) => {
+      const { token: tkn} = token
       const tokenData = {
-        tokenSymbol: token.symbol || "???",
-        tokenName: token.name || "Unknown Token",
-        tokenMint: token.mint || token.address,
-        tokenImage: token.imageUrl || token.logoURI,
+        tokenSymbol: tkn.ticker || "???",
+        tokenName: tkn.name || "Unknown Token",
+        tokenMint: token.mint || tkn.address,
+        tokenImage: tkn.imageUrl || tkn.logoURI,
       };
 
       // Launch activity
@@ -103,6 +104,10 @@ const RecentActivity = () => {
     setActivities(allActivities.slice(0, 20));
   }, [marketplaceData]);
 
+  // Hide section if no activities
+  if (!activities || activities.length === 0) {
+    return null;
+  }
   return (
     <div className="w-full py-12 px-4">
       <div className="max-w-7xl mx-auto">
