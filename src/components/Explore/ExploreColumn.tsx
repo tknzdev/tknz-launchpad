@@ -24,8 +24,18 @@ import {
 import { Pool } from "@/contexts/types";
 import { isHoverableDevice, useBreakpoint } from "@/lib/device";
 
-type ExploreColumnProps = {
+ type ExploreColumnProps = {
   tab: ExploreTab;
+  /** Optional search query to filter tokens by name or symbol */
+  searchQuery?: string;
+  /** Optional minimum 24h volume filter (string to parse) */
+  minVolume?: string;
+  /** Optional creation date filter (ISO date string) */
+  createdAfter?: string;
+  /** Advanced toggles */
+  verifiedOnly?: boolean;
+  bondingCurveOnly?: boolean;
+  graduatedOnly?: boolean;
 };
 
 export const ExploreTabTitleMap: Record<ExploreTab, string> = {
@@ -34,7 +44,15 @@ export const ExploreTabTitleMap: Record<ExploreTab, string> = {
   [ExploreTab.GRADUATED]: `GRADUATED`,
 };
 
-export const ExploreColumn: React.FC<ExploreColumnProps> = ({ tab }) => {
+export const ExploreColumn: React.FC<ExploreColumnProps> = ({
+  tab,
+  searchQuery,
+  minVolume,
+  createdAfter,
+  verifiedOnly,
+  bondingCurveOnly,
+  graduatedOnly,
+}) => {
   const { pausedTabs, setTabPaused, request } = useExplore();
   const isPaused = pausedTabs[tab];
   const setIsPaused = useCallback(
@@ -59,23 +77,47 @@ export const ExploreColumn: React.FC<ExploreColumnProps> = ({ tab }) => {
           request={request}
           isPaused={isPaused}
           setIsPaused={setIsPaused}
+          searchQuery={searchQuery}
+          minVolume={minVolume}
+          createdAfter={createdAfter}
         />
       </div>
     </div>
   );
 };
 
-type TokenCardListContainerProps = {
+ type TokenCardListContainerProps = {
   tab: ExploreTab;
   request: Required<GemsTokenListQueryArgs>;
   isPaused: boolean;
   setIsPaused: (isPaused: boolean) => void;
+  /** Optional search query to filter tokens by name or symbol */
+  searchQuery?: string;
+  /** Optional minimum 24h volume filter (string to parse) */
+  minVolume?: string;
+  /** Optional creation date filter (ISO date string) */
+  createdAfter?: string;
+  /** Advanced toggles */
+  verifiedOnly?: boolean;
+  bondingCurveOnly?: boolean;
+  graduatedOnly?: boolean;
 };
 
 const timeframe = EXPLORE_FIXED_TIMEFRAME;
 
 const TokenCardListContainer: React.FC<TokenCardListContainerProps> = memo(
-  ({ tab, request, isPaused, setIsPaused }) => {
+  ({
+    tab,
+    request,
+    isPaused,
+    setIsPaused,
+    searchQuery,
+    minVolume,
+    createdAfter,
+    verifiedOnly,
+    bondingCurveOnly,
+    graduatedOnly,
+  }) => {
     const queryClient = useQueryClient();
     const breakpoint = useBreakpoint();
     const isMobile =
@@ -196,11 +238,50 @@ const TokenCardListContainer: React.FC<TokenCardListContainerProps> = memo(
           return snapshotPool;
         })
       : currentData?.pools;
+    // Apply filters: search by name/symbol, min 24h volume, created after date
+    const filteredData = displayData?.filter((pool) => {
+      // Advanced toggles
+      if (verifiedOnly && !pool.baseAsset.isVerified) {
+        return false;
+      }
+      if (bondingCurveOnly && pool.bondingCurve == null) {
+        return false;
+      }
+      if (graduatedOnly && !pool.baseAsset.graduatedAt) {
+        return false;
+      }
+      // Search filter
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        const name = pool.baseAsset.name.toLowerCase();
+        const symbol = pool.baseAsset.symbol.toLowerCase();
+        if (!name.includes(q) && !symbol.includes(q)) {
+          return false;
+        }
+      }
+      // Volume filter
+      if (minVolume) {
+        const minVol = parseFloat(minVolume);
+        const vol = pool.volume24h ?? 0;
+        if (isNaN(minVol) || vol < minVol) {
+          return false;
+        }
+      }
+      // Created date filter
+      if (createdAfter) {
+        const createdDate = new Date(pool.createdAt);
+        const afterDate = new Date(createdAfter);
+        if (createdDate < afterDate) {
+          return false;
+        }
+      }
+      return true;
+    });
 
     return (
       <TokenCardList
         ref={listRef}
-        data={displayData}
+        data={filteredData}
         status={status}
         timeframe={timeframe}
         trackPools
