@@ -254,6 +254,10 @@ export type Pool = {
     isVerified?: boolean | undefined;
     ctLikes?: number | undefined;
     smartCtLikes?: number | undefined;
+    /**
+     * Additional metadata extensions such as website, twitter, etc.
+     */
+    extensions?: Record<string, string> | undefined;
   };
 
   // frontend field
